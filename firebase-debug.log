@@ -1,0 +1,35 @@
+[debug] [2026-06-18T18:55:16.896Z] ----------------------------------------------------------------------
+[debug] [2026-06-18T18:55:16.898Z] Command:       /usr/local/bin/node /Users/harshitagrawal/.npm/_npx/ba4f1959e38407b5/node_modules/.bin/firebase apps:create WEB HistoriaVis --project simple-tool-visualisation
+[debug] [2026-06-18T18:55:16.898Z] CLI Version:   15.21.0
+[debug] [2026-06-18T18:55:16.898Z] Platform:      darwin
+[debug] [2026-06-18T18:55:16.898Z] Node Version:  v24.14.1
+[debug] [2026-06-18T18:55:16.898Z] Detected Agent: antigravity
+[debug] [2026-06-18T18:55:16.898Z] Time:          Fri Jun 19 2026 00:25:16 GMT+0530 (India Standard Time)
+[debug] [2026-06-18T18:55:16.898Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-06-18T18:55:16.914Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-06-18T18:55:16.914Z] > authorizing via signed-in user (agharshit08@gmail.com)
+[info] Create your WEB app in project simple-tool-visualisation:
+[debug] [2026-06-18T18:55:16.915Z] Checked if tokens are valid: true, expires at: 1781810972544
+[debug] [2026-06-18T18:55:16.915Z] Checked if tokens are valid: true, expires at: 1781810972544
+[debug] [2026-06-18T18:55:16.916Z] >>> [apiv2][query] POST https://firebase.googleapis.com/v1beta1/projects/simple-tool-visualisation/webApps [none]
+[debug] [2026-06-18T18:55:16.916Z] >>> [apiv2][body] POST https://firebase.googleapis.com/v1beta1/projects/simple-tool-visualisation/webApps {"displayName":"HistoriaVis"}
+[debug] [2026-06-18T18:55:18.958Z] <<< [apiv2][status] POST https://firebase.googleapis.com/v1beta1/projects/simple-tool-visualisation/webApps 200
+[debug] [2026-06-18T18:55:18.959Z] <<< [apiv2][body] POST https://firebase.googleapis.com/v1beta1/projects/simple-tool-visualisation/webApps {"name":"operations/workflows/MGVmYTc2MmEtNDg5Ni00YTM3LWE2NjYtMDZkZjAwOTVjM2Ri"}
+[debug] [2026-06-18T18:55:18.960Z] Checked if tokens are valid: true, expires at: 1781810972544
+[debug] [2026-06-18T18:55:18.960Z] Checked if tokens are valid: true, expires at: 1781810972544
+[debug] [2026-06-18T18:55:18.960Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/operations/workflows/MGVmYTc2MmEtNDg5Ni00YTM3LWE2NjYtMDZkZjAwOTVjM2Ri [none]
+[debug] [2026-06-18T18:55:20.062Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/operations/workflows/MGVmYTc2MmEtNDg5Ni00YTM3LWE2NjYtMDZkZjAwOTVjM2Ri 200
+[debug] [2026-06-18T18:55:20.062Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/operations/workflows/MGVmYTc2MmEtNDg5Ni00YTM3LWE2NjYtMDZkZjAwOTVjM2Ri {"name":"operations/workflows/MGVmYTc2MmEtNDg5Ni00YTM3LWE2NjYtMDZkZjAwOTVjM2Ri"}
+[debug] [2026-06-18T18:55:20.564Z] [Create Web app Poller] Retrying task index 0
+[debug] [2026-06-18T18:55:20.564Z] Checked if tokens are valid: true, expires at: 1781810972544
+[debug] [2026-06-18T18:55:20.564Z] Checked if tokens are valid: true, expires at: 1781810972544
+[debug] [2026-06-18T18:55:20.564Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/operations/workflows/MGVmYTc2MmEtNDg5Ni00YTM3LWE2NjYtMDZkZjAwOTVjM2Ri [none]
+[debug] [2026-06-18T18:55:21.431Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/operations/workflows/MGVmYTc2MmEtNDg5Ni00YTM3LWE2NjYtMDZkZjAwOTVjM2Ri 200
+[debug] [2026-06-18T18:55:21.432Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/operations/workflows/MGVmYTc2MmEtNDg5Ni00YTM3LWE2NjYtMDZkZjAwOTVjM2Ri {"name":"operations/workflows/MGVmYTc2MmEtNDg5Ni00YTM3LWE2NjYtMDZkZjAwOTVjM2Ri"}
+[debug] [2026-06-18T18:55:22.433Z] [Create Web app Poller] Retrying task index 0
+[debug] [2026-06-18T18:55:22.433Z] Checked if tokens are valid: true, expires at: 1781810972544
+[debug] [2026-06-18T18:55:22.433Z] Checked if tokens are valid: true, expires at: 1781810972544
+[debug] [2026-06-18T18:55:22.433Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/operations/workflows/MGVmYTc2MmEtNDg5Ni00YTM3LWE2NjYtMDZkZjAwOTVjM2Ri [none]
+[debug] [2026-06-18T18:55:23.145Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/operations/workflows/MGVmYTc2MmEtNDg5Ni00YTM3LWE2NjYtMDZkZjAwOTVjM2Ri 200
+[debug] [2026-06-18T18:55:23.145Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/operations/workflows/MGVmYTc2MmEtNDg5Ni00YTM3LWE2NjYtMDZkZjAwOTVjM2Ri {"name":"operations/workflows/MGVmYTc2MmEtNDg5Ni00YTM3LWE2NjYtMDZkZjAwOTVjM2Ri"}
