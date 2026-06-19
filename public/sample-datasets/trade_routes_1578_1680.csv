@@ -1,0 +1,104 @@
+year,merchant,origin_city,destination_city,cargo,value_ducats,ship_name,voyage_days,crew_size,outcome
+1578,Marco Bello,Venice,Alexandria,Spices,4500,La Serenissima,42,38,Success
+1579,Hans Vogel,Hamburg,Antwerp,Cloth,2100,Der Adler,8,22,Success
+1580,João Ferreira,Lisbon,Goa,Wool,8200,Nossa Senhora,180,65,Success
+1581,Pieter van Hoorn,Amsterdam,Constantinople,Grain,3400,De Vrede,35,28,Success
+1582,Jean Dupont,Marseille,Smyrna,Wine,1800,Le Mercure,22,19,Success
+1583,Thomas Gould,London,Amsterdam,Wool,5600,The Merchant,5,31,Success
+1584,Gerrit Claesz,Amsterdam,Batavia,Silver,12000,Prins Maurits,210,82,Success
+1585,Alonso García,Seville,Havana,Textiles,6700,San Miguel,55,48,Success
+1586,Wilhelm Braun,Hamburg,Stockholm,Iron,2900,Der Falke,12,24,Success
+1587,Cornelis Bicker,Amsterdam,Venice,Spices,9800,Gouden Leeuw,28,35,Delayed
+1588,Francesco Morosini,Venice,Smyrna,Glass,3200,Leone di Venezia,20,21,Success
+1589,Jan de Witt,Amsterdam,London,Textiles,7400,De Vrijheid,5,29,Success
+1590,Samuel Aldrich,London,Lisbon,Coal,1500,Royal Oak,10,18,Success
+1591,Louis Savary,Paris,Genoa,Silk,4800,La Couronne,14,23,Success
+1592,Pieter de Groot,Amsterdam,Hamburg,Cheese,2200,De Hoop,8,19,Success
+1593,Edward Hartley,London,Boston,Manufactured goods,8900,The Providence,55,52,Success
+1594,Jean-Baptiste Laurent,Marseille,Cairo,Cotton,5100,Le Soleil,30,27,Delayed
+1595,Friedrich Meyer,Frankfurt,Vienna,Books,1900,Der Merkur,15,16,Success
+1596,Thomas Dale,London,Philadelphia,Iron,6300,The Enterprise,58,49,Success
+1597,Rodrigo Álvarez,Seville,Lima,Gold,22000,Santa María,78,62,Success
+1598,Dirk Hartog,Amsterdam,Cape Town,Spices,11500,Eendracht,145,74,Success
+1599,Giovanni Morosini,Venice,Constantinople,Silk,6800,Marco Polo,24,31,Success
+1600,Henri Bouchard,Paris,Amsterdam,Wine,3300,L'Espoir,6,22,Success
+1601,Peter Stuyvesant,Amsterdam,New Amsterdam,Beaver pelts,4200,Goede Hoop,68,41,Success
+1602,António Mota,Lisbon,Goa,Silver,14500,São Gabriel,185,78,Success
+1603,Jan Pieterszoon,Amsterdam,Batavia,Nutmeg,18000,Amsterdam,215,88,Delayed
+1604,William Sanderson,London,Newfoundland,Salt cod,3800,Mary Rose,45,36,Success
+1605,Carlos Velez,Seville,Cartagena,Textiles,7600,Nuestra Señora,65,55,Success
+1606,Otto van Veen,Amsterdam,London,Tulip bulbs,9200,De Tulp,5,28,Success
+1607,Francesco Datini,Genoa,Antwerp,Wool,5400,San Giorgio,18,33,Success
+1608,Balthasar Krug,Frankfurt,Venice,Copper,7800,Der Elephant,22,29,Success
+1609,Abraham Coen,Amsterdam,Hamburg,Herring,2800,De Vis,9,21,Success
+1610,Jacques Cartier II,Marseille,Constantinople,Grain,4100,La Liberté,28,26,Success
+1611,Henry Hudson Jr,London,New Amsterdam,Furs,6500,Half Moon,62,38,Lost at sea
+1612,Pieter Both,Amsterdam,Batavia,Cloves,21000,Hector,220,91,Success
+1613,Edward Fenton,London,Lisbon,Wool,4300,Mary Fortune,10,32,Success
+1614,Cornelis Matelief,Amsterdam,Malacca,Pepper,16800,Nassau,190,84,Success
+1615,Juan de Solís,Seville,Buenos Aires,Manufactured goods,8100,San Lorenzo,72,57,Success
+1616,Wilhelm Faber,Hamburg,Riga,Salt,3100,Der Wind,14,23,Delayed
+1617,Théodore de Bry,Frankfurt,Amsterdam,Books,2400,Der Buchhändler,8,18,Success
+1618,Michel de Geer,Amsterdam,Stockholm,Cannon,9600,De Kanon,18,34,Success
+1619,Francesco Grimaldi,Genoa,London,Silk,8700,Genovese,15,37,Success
+1620,John Smith,London,Plymouth Colony,Provisions,4600,Mayflower II,65,48,Success
+1621,Pieter Hasselaer,Amsterdam,Venice,Cloth,5900,De Laken,25,31,Success
+1622,Jan Joosten,Amsterdam,Japan,Silver,19000,Liefde,310,96,Success
+1623,Johann Schröder,Hamburg,Gdansk,Grain,3700,Der Korn,10,22,Success
+1624,António Vieira,Lisbon,Brazil,Dyewoods,7200,São Francisco,72,54,Success
+1625,Samuel de Champlain,Paris,Quebec,Furs,5300,Saint-Louis,45,39,Success
+1626,Peter Minuit,Amsterdam,New Amsterdam,Trade goods,11000,Nieu Nederland,68,46,Success
+1627,Jan Pietersen Coen,Amsterdam,Batavia,Spices,24000,Concordia,225,95,Success
+1628,Piet Heyn,Amsterdam,Havana,Silver,23500,Prins Hendrik,62,87,Captured
+1629,Fernão de Magalhães Jr,Lisbon,Macao,Silk,13800,São Domingos,280,72,Success
+1630,Johannes Vermeer Sr,Delft,London,Faience,4200,De Porseleyn,5,24,Success
+1631,Augustin Coronelli,Venice,Constantinople,Maps,3600,La Bussola,22,20,Success
+1632,Caspar Schmalkalden,Frankfurt,Hamburg,Manuscripts,2100,Der Schreiber,12,16,Success
+1633,Nicolas Fouquet,Paris,Marseille,Wheat,3800,La Fortune,7,21,Success
+1634,Cornelis Tromp,Amsterdam,London,Herring,6100,De Zeeheld,6,33,Success
+1635,Thijs Jacobsz,Amsterdam,Batavia,Textiles,17500,Batavia,218,89,Shipwrecked
+1636,Anthony van Diemen,Amsterdam,Cape Town,Provisions,8400,Domburch,148,71,Success
+1637,Wilhelm Dapper,Hamburg,Lisbon,Grain,4500,Der Nordstern,14,27,Success
+1638,Cornelis de Witt,Amsterdam,Venice,Cloth,7200,Schiedam,28,32,Success
+1639,Francesco Guicciardini,Florence,Antwerp,Silk,9500,La Medici,22,38,Success
+1640,Marcus de Vogelaer,Antwerp,London,Tapestries,6800,De Vlaming,5,28,Success
+1641,Maarten Tromp,Amsterdam,London,Herring,5400,Brederode,6,37,Delayed
+1642,Abel Tasman,Amsterdam,Batavia,Provisions,13200,Heemskerck,185,76,Success
+1643,Jean Talon,Paris,Quebec,Manufactured goods,7100,La Paix,47,43,Success
+1644,Pedro de la Gasca,Seville,Lima,Textiles,9800,San Juan,82,61,Success
+1645,Elias Ashmole,London,Hamburg,Books,2300,The Scholar,8,17,Success
+1646,Hans Welser,Augsburg,Venice,Copper,8800,Der Fugger,20,29,Success
+1647,Johann de Witt,Amsterdam,London,Cloth,5600,De Leeuw,5,27,Success
+1648,Louis de Geer,Amsterdam,Stockholm,Cannon,12400,De Zwaard,18,41,Success
+1649,Bartholomew Sharp,London,Havana,Manufactured goods,7300,The Revenge,58,52,Success
+1650,Pieter Cornelisz,Amsterdam,Batavia,Spices,25000,Wassenaar,220,98,Success
+1651,Nicolas Colbert,Paris,Marseille,Silk,4700,Le Dauphin,7,23,Success
+1652,Jan van Riebeeck,Amsterdam,Cape Town,Provisions,9100,Drommedaris,135,68,Success
+1653,António Vidigal,Lisbon,Goa,Silver,16200,Santo António,188,79,Success
+1654,Frederick de Houtman,Amsterdam,Batavia,Cloth,14500,Middelburg,212,86,Delayed
+1655,Ambrosius Richter,Hamburg,Riga,Salt,3600,Der Salzhändler,13,24,Success
+1656,Jean-Baptiste Tavernier,Paris,Constantinople,Diamonds,31000,La Gemme,32,21,Success
+1657,Hendrick Hamel,Amsterdam,Korea,Trade goods,11800,Sperwer,285,64,Shipwrecked
+1658,Théodore Moquet,Marseille,Cairo,Wool,5200,Le Caire,29,26,Success
+1659,Johan Nieuhof,Amsterdam,China,Silver,22000,De Jonge Prins,310,95,Success
+1660,Thomas Dalby,London,Boston,Manufactured goods,9600,The Enterprise,58,54,Success
+1661,Cornelis Witsen,Amsterdam,Hamburg,Herring,3800,De Visser,9,22,Success
+1662,Philippo Mazzei,Florence,London,Wine,6300,La Toscana,17,28,Success
+1663,Jacques Savary,Paris,Antwerp,Silk,8900,La Soie,6,31,Success
+1664,Peter Stuyvesant,New Amsterdam,London,Beaver pelts,12100,Duke of York,8,44,Captured
+1665,Johan de Witt,Amsterdam,Copenhagen,Grain,4300,De Vrede,16,26,Delayed
+1666,Samuel Pepys,London,Lisbon,Coal,2800,The Samuell,10,19,Success
+1667,Simon de la Loubère,Paris,Siam,Silk,18500,La Asie,240,73,Success
+1668,Nicolaas Witsen,Amsterdam,Moscow,Trade goods,7600,De Nederlander,42,38,Success
+1669,Thomas Mun,London,Hamburg,Wool,5100,The Mun,8,24,Success
+1670,Ferdinand Verbiest,Brussels,Peking,Clocks,14200,De Jezuiet,310,67,Success
+1671,Jean Chardin,Paris,Smyrna,Silk,9400,La Perse,24,29,Success
+1672,Abraham de la Pryme,London,Amsterdam,Books,2700,The Antiquary,5,18,Success
+1673,Louis Jolliet,Paris,Quebec,Furs,6800,La Salle,48,36,Success
+1674,Anthony à Wood,London,Amsterdam,Manuscripts,3100,The Bodleian,5,17,Success
+1675,Hendrik Adriaan van Rheede,Amsterdam,Goa,Scientific instruments,11300,Malabaar,192,74,Success
+1676,Olof Rudbeck,Stockholm,Amsterdam,Books,4200,Atlantica,18,21,Success
+1677,Francesco Redi,Florence,Paris,Wine,5600,La Scienza,16,24,Success
+1678,Isaac Newton Sr,London,Hamburg,Wool,3900,The Principia,8,22,Success
+1679,Charles de la Condamine,Paris,Lisbon,Maps,4800,L'Équateur,10,23,Success
+1680,Edmond Halley,London,Cape Town,Scientific instruments,7200,The Comet,145,49,Success

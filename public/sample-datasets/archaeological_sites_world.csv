@@ -1,0 +1,100 @@
+site_name,latitude,longitude,modern_country,period_founded,period_end,site_type,artifact_count,excavation_year,significance_score,excavation_status,unesco_listed
+Pompeii,40.7491,14.4989,Italy,-80,79,City,45000,1748,10,Ongoing,Yes
+Herculaneum,40.8060,14.3472,Italy,-600,79,City,18000,1709,9,Ongoing,Yes
+Colosseum,41.8902,12.4922,Italy,70,523,Amphitheatre,2000,1813,10,Complete,Yes
+Hadrians Wall,54.9910,-2.6001,United Kingdom,122,400,Fortification,8500,1848,9,Ongoing,Yes
+Carthage,36.8528,10.3233,Tunisia,-814,-146,City,32000,1857,9,Complete,Yes
+Ephesus,37.9394,27.3417,Turkey,-1000,654,City,25000,1863,10,Ongoing,Yes
+Leptis Magna,32.6380,14.2918,Libya,-600,643,City,15000,1920,9,Halted,Yes
+Ostia Antica,41.7563,12.2908,Italy,-400,850,Port City,28000,1800,8,Ongoing,No
+Bath Aquae Sulis,51.3813,-2.3594,United Kingdom,60,410,Spa Complex,6000,1727,9,Ongoing,Yes
+Masada,31.3156,35.3539,Israel,-37,73,Fortress,12000,1963,9,Complete,Yes
+Palmyra,34.5503,38.2921,Syria,-100,273,City,22000,1924,9,Damaged,Yes
+Petra,30.3285,35.4444,Jordan,-400,700,City,19000,1812,10,Ongoing,Yes
+Delphi,38.4824,22.5010,Greece,-1500,-390,Sanctuary,31000,1892,10,Complete,Yes
+Olympia,37.6388,21.6300,Greece,-1000,-393,Sanctuary,28500,1829,10,Ongoing,Yes
+Athens Agora,37.9737,23.7257,Greece,-600,-267,City Centre,41000,1931,10,Ongoing,No
+Forum Romanum,41.8925,12.4853,Italy,-600,476,City Centre,35000,1803,10,Ongoing,No
+Carnuntum,48.1167,16.8500,Austria,50,433,Legion Camp,9800,1885,8,Ongoing,No
+Aquincum,47.5167,19.0333,Hungary,41,430,Legion Camp,11200,1778,8,Ongoing,No
+Vindolanda,54.9900,-2.3600,United Kingdom,85,370,Fort,7600,1930,8,Ongoing,No
+Verulamium,51.7553,-0.3410,United Kingdom,43,410,City,8900,1930,8,Complete,No
+Camulodunum,51.8959,0.8919,United Kingdom,43,200,Colony,6700,1920,7,Complete,No
+Aquae Helveticae,47.4744,8.3073,Switzerland,50,400,Spa Town,4500,1844,7,Complete,No
+Augusta Raurica,47.5328,7.7197,Switzerland,44,300,Colony,14200,1588,8,Ongoing,No
+Timgad,35.4828,6.4679,Algeria,100,430,Colony,18600,1881,8,Ongoing,Yes
+Djemila,36.3205,5.7383,Algeria,96,365,City,12400,1909,9,Ongoing,Yes
+Volubilis,34.0722,-5.5558,Morocco,25,285,City,9800,1915,8,Ongoing,Yes
+Carthago Nova,37.6008,-0.9843,Spain,-228,800,City,13500,1865,7,Ongoing,No
+Italica,37.4406,-6.0533,Spain,-206,700,Colony,16800,1781,8,Ongoing,No
+Emerita Augusta,38.9167,-6.3333,Spain,-25,700,Colony,21000,1910,8,Ongoing,No
+Lutetia,48.8566,2.3522,France,-250,476,City,31000,1849,8,Ongoing,No
+Lugdunum,45.7600,4.8320,France,-43,476,Colony,24500,1884,8,Ongoing,No
+Massalia,43.2965,5.3698,France,-600,476,City,19800,1965,7,Ongoing,No
+Aquileia,45.7694,13.3703,Italy,-181,452,Colony,22000,1896,9,Ongoing,Yes
+Ravenna,44.4184,12.2035,Italy,402,752,City,16500,1800,9,Ongoing,Yes
+Trier,49.7596,6.6440,Germany,-30,476,City,19200,1877,8,Ongoing,Yes
+Cologne,50.9333,6.9500,Germany,50,476,Colony,15600,1848,8,Ongoing,No
+Xanten,51.6603,6.4534,Germany,13,275,Colony,11800,1890,8,Ongoing,Yes
+Regensburg,49.0134,12.1016,Germany,79,476,Fort,9600,1901,7,Ongoing,No
+Vindobona,48.2082,16.3738,Austria,100,433,Fort,13400,1895,7,Ongoing,No
+Carnuntum Civilian,48.1244,16.8456,Austria,73,395,City,10200,1905,8,Ongoing,No
+Thessaloniki,40.6401,22.9444,Greece,-315,1000,City,28000,1912,8,Ongoing,No
+Philippi,41.0120,24.2880,Greece,-360,50,City,14500,1914,8,Ongoing,Yes
+Nikopolis,39.0112,20.7516,Greece,-31,551,City,11600,1913,7,Ongoing,Yes
+Stobi,41.5395,21.9844,North Macedonia,168,585,City,9400,1924,7,Ongoing,Yes
+Heraclea Lyncestis,41.0333,21.4000,North Macedonia,-350,600,City,8200,1936,6,Ongoing,No
+Serdica,42.6977,23.3219,Bulgaria,-100,447,City,17800,1902,7,Ongoing,No
+Nicopolis ad Istrum,43.2375,25.5956,Bulgaria,102,602,City,12100,1900,7,Ongoing,Yes
+Histria,44.5456,28.7742,Romania,-630,700,City,16300,1914,7,Ongoing,Yes
+Apulum,46.0690,23.5780,Romania,106,271,Legion Camp,14700,1898,7,Ongoing,No
+Dacia Felix,45.7489,21.2087,Romania,106,271,Province Capital,19200,1872,8,Ongoing,No
+Caesarea Maritima,32.5000,34.9000,Israel,-22,640,Port City,23500,1959,9,Ongoing,Yes
+Jericho,31.8610,35.4444,Palestinian Territories,-9000,-100,City,41000,1867,10,Ongoing,No
+Megiddo,32.5833,35.1833,Israel,-4000,-500,Fortress,35000,1903,10,Complete,Yes
+Hazor,33.0167,35.5667,Israel,-2700,-732,City,28000,1928,9,Ongoing,Yes
+Bet Shean,32.4980,35.4965,Israel,-5000,749,City,31000,1921,8,Ongoing,No
+Jerash,32.2741,35.8917,Jordan,100,749,City,19800,1806,9,Ongoing,Yes
+Pella Jordan,32.4600,35.6100,Jordan,-3500,700,City,22500,1967,7,Ongoing,No
+Ugarit,35.6019,35.7781,Syria,-3500,-1185,City,38000,1929,10,Halted,Yes
+Mari,34.5456,40.8872,Syria,-2900,-1759,City,34000,1933,9,Halted,Yes
+Ebla,35.7975,36.7989,Syria,-3000,-1600,City,17000,1964,9,Halted,Yes
+Nineveh,36.3590,43.1527,Iraq,-700,-612,City,29000,1820,9,Halted,No
+Nimrud,36.0980,43.3300,Iraq,-1300,-609,City,24000,1845,9,Damaged,No
+Ur,30.9620,46.1030,Iraq,-3800,-500,City,42000,1854,10,Halted,Yes
+Uruk,31.3228,45.6364,Iraq,-5000,-300,City,38000,1849,10,Halted,No
+Babylon,32.5421,44.4215,Iraq,-2300,-539,City,45000,1899,10,Halted,Yes
+Pasargadae,30.1927,53.1696,Iran,-550,-330,Palace Complex,16500,1905,9,Ongoing,Yes
+Persepolis,29.9353,52.8911,Iran,-518,-330,Palace Complex,28000,1931,10,Ongoing,Yes
+Susa,32.1879,48.2576,Iran,-4000,1218,City,52000,1884,10,Ongoing,Yes
+Mohenjo-daro,27.3269,68.1379,Pakistan,-2500,-1900,City,48000,1922,10,Ongoing,Yes
+Harappa,30.6288,72.8644,Pakistan,-3500,-1900,City,41000,1921,10,Ongoing,Yes
+Taxila,33.7390,72.8395,Pakistan,-500,500,City,22000,1913,9,Ongoing,Yes
+Sanchi,23.4793,77.7395,India,-300,1200,Stupa Complex,8500,1818,9,Ongoing,Yes
+Hampi,15.3350,76.4621,India,1336,1565,City,24000,1800,9,Ongoing,Yes
+Mahabalipuram,12.6269,80.1927,India,600,900,Port City,12000,1820,9,Ongoing,Yes
+Angkor,13.4125,103.8670,Cambodia,802,1431,Temple Complex,35000,1861,10,Ongoing,Yes
+My Son,15.7758,108.1227,Vietnam,200,1400,Sanctuary,9800,1898,8,Ongoing,Yes
+Bagan,21.1717,94.8585,Myanmar,849,1297,City,41000,1904,9,Ongoing,Yes
+Borobudur,-7.6079,110.2038,Indonesia,750,900,Temple,14500,1814,10,Ongoing,Yes
+Prambanan,-7.7520,110.4914,Indonesia,850,900,Temple Complex,12800,1811,9,Ongoing,Yes
+Troy,39.9573,26.2387,Turkey,-3000,-146,City,26000,1863,10,Ongoing,Yes
+Mycenae,37.7307,22.7561,Greece,-1600,-1100,Citadel,18500,1841,10,Ongoing,Yes
+Knossos,35.2983,25.1630,Greece,-2700,-1420,Palace,31000,1900,10,Ongoing,Yes
+Akrotiri Thera,36.3514,25.3961,Greece,-1700,-1628,City,14000,1967,10,Ongoing,Yes
+Çatalhöyük,37.6686,32.8260,Turkey,-7500,-5700,City,22000,1958,10,Ongoing,Yes
+Göbekli Tepe,37.2231,38.9225,Turkey,-9600,-8200,Sanctuary,8500,1994,10,Ongoing,Yes
+Stonehenge,51.1789,-1.8262,United Kingdom,-2500,-1500,Ritual Site,4200,1620,10,Ongoing,Yes
+Avebury,51.4284,-1.8544,United Kingdom,-2850,-2200,Henge Monument,3800,1648,9,Ongoing,Yes
+Newgrange,53.6947,-6.4758,Ireland,-3200,-2900,Passage Tomb,5100,1699,9,Ongoing,Yes
+Skara Brae,59.0488,-3.3417,United Kingdom,-3180,-2500,Settlement,6200,1850,9,Complete,Yes
+Carnac,47.5853,-3.0590,France,-4500,-3300,Megalithic Site,7800,1860,8,Ongoing,No
+Lascaux,45.0546,1.0814,France,-17000,-15000,Cave Art,2100,1940,10,Closed,Yes
+Altamira,43.3784,-4.1172,Spain,-18500,-13000,Cave Art,1800,1868,10,Closed,Yes
+Chauvet,44.4000,4.4167,France,-36000,-31000,Cave Art,950,1994,10,Closed,No
+Great Zimbabwe,-20.2670,30.9338,Zimbabwe,1100,1450,City,18000,1871,9,Ongoing,Yes
+Mapungubwe,-22.1989,29.3808,South Africa,900,1300,Kingdom,12000,1932,8,Ongoing,Yes
+Meroe,16.9333,33.7167,Sudan,-300,350,City,24000,1905,9,Ongoing,Yes
+Aksum,14.1280,38.7214,Ethiopia,100,940,Kingdom,19500,1906,9,Ongoing,Yes
+Carthage Punic,36.8528,10.3233,Tunisia,-814,-146,Port City,29000,1949,9,Complete,Yes
+Timgad East,35.4864,6.4712,Algeria,100,700,Forum,8200,1881,7,Ongoing,No

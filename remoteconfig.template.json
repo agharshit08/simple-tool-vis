@@ -1,0 +1,16 @@
+{
+  "parameters": {
+    "ai_model_name": {
+      "defaultValue": {
+        "value": "gemini-3.5-flash"
+      },
+      "valueType": "STRING"
+    },
+    "column_detection_prompt_template": {
+      "defaultValue": {
+        "value": "You are an expert data analyst AI.\nAnalyze this column from a dataset:\nColumn Name: {columnName}\nSample values: {samples}\n\nClassify the column into exactly ONE of the following generic types:\n- date\n- year\n- location\n- latitude\n- longitude\n- entity\n- number\n- boolean\n- category\n- text\n- relationship\n\nIf it doesn't clearly match a specific type, default to 'text'.\n\nRespond ONLY with the exact type name in lowercase."
+      },
+      "valueType": "STRING"
+    }
+  }
+}

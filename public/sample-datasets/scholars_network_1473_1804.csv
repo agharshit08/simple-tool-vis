@@ -1,0 +1,97 @@
+name,birth_year,birth_city,death_year,death_city,discipline,known_to,institution,major_work,nationality
+Galileo Galilei,1564,Pisa,1642,Arcetri,Astronomy,Johannes Kepler,University of Padua,Sidereus Nuncius,Italian
+Johannes Kepler,1571,Weil der Stadt,1630,Regensburg,Astronomy,Galileo Galilei,University of Graz,Harmonices Mundi,German
+René Descartes,1596,La Haye en Touraine,1650,Stockholm,Philosophy,Marin Mersenne,None,Discourse on Method,French
+Francis Bacon,1561,London,1626,London,Philosophy,René Descartes,Cambridge University,Novum Organum,English
+Tycho Brahe,1546,Knutstorp,1601,Prague,Astronomy,Johannes Kepler,Uraniborg Observatory,Astronomiae Instauratae,Danish
+Nicolaus Copernicus,1473,Torun,1543,Frombork,Astronomy,Tycho Brahe,University of Krakow,De revolutionibus,Polish
+Giordano Bruno,1548,Nola,1600,Rome,Philosophy,Galileo Galilei,None,De l'Infinito Universo,Italian
+William Harvey,1578,Folkestone,1657,London,Medicine,Francis Bacon,University of Padua,De Motu Cordis,English
+Andreas Vesalius,1514,Brussels,1564,Zakynthos,Medicine,William Harvey,University of Padua,De Humani Corporis Fabrica,Flemish
+Isaac Newton,1643,Woolsthorpe,1727,London,Mathematics,Gottfried Leibniz,Cambridge University,Principia Mathematica,English
+Gottfried Leibniz,1646,Leipzig,1716,Hanover,Mathematics,Isaac Newton,None,Monadology,German
+John Locke,1632,Wrington,1704,Oates,Philosophy,Isaac Newton,Oxford University,Essay Concerning Human Understanding,English
+Robert Hooke,1635,Freshwater,1703,London,Natural Philosophy,Isaac Newton,Gresham College,Micrographia,English
+Christiaan Huygens,1629,The Hague,1695,The Hague,Physics,Isaac Newton,French Academy of Sciences,Horologium Oscillatorium,Dutch
+Antoine Lavoisier,1743,Paris,1794,Paris,Chemistry,Joseph Priestley,French Academy of Sciences,Traité Élémentaire de Chimie,French
+Joseph Priestley,1733,Birstall,1804,Northumberland,Chemistry,Antoine Lavoisier,Warrington Academy,Experiments on Air,English
+Carl Linnaeus,1707,Rashult,1778,Uppsala,Botany,Georges-Louis Buffon,Uppsala University,Systema Naturae,Swedish
+Georges-Louis Buffon,1707,Montbard,1788,Paris,Natural History,Carl Linnaeus,Jardin du Roi,Histoire Naturelle,French
+Leonhard Euler,1707,Basel,1783,Saint Petersburg,Mathematics,Joseph-Louis Lagrange,University of Basel,Introductio in Analysin,Swiss
+Joseph-Louis Lagrange,1736,Turin,1813,Paris,Mathematics,Leonhard Euler,Prussian Academy,Mécanique Analytique,Italian-French
+Pierre-Simon Laplace,1749,Beaumont-en-Auge,1827,Paris,Mathematics,Joseph-Louis Lagrange,French Academy of Sciences,Mécanique Céleste,French
+Alessandro Volta,1745,Como,1827,Como,Physics,Luigi Galvani,University of Pavia,On the Electricity Excited by the Mere Contact,Italian
+Luigi Galvani,1737,Bologna,1798,Bologna,Medicine,Alessandro Volta,University of Bologna,De viribus electricitatis,Italian
+Georg Wilhelm Friedrich Hegel,1770,Stuttgart,1831,Berlin,Philosophy,Friedrich Schelling,University of Berlin,Phenomenology of Spirit,German
+Friedrich Schelling,1775,Leonberg,1854,Bad Ragaz,Philosophy,Georg Wilhelm Friedrich Hegel,University of Munich,System des transzendentalen Idealismus,German
+Immanuel Kant,1724,Königsberg,1804,Königsberg,Philosophy,Georg Wilhelm Friedrich Hegel,University of Königsberg,Critique of Pure Reason,German
+Voltaire,1694,Paris,1778,Paris,Philosophy,Jean-Jacques Rousseau,None,Candide,French
+Jean-Jacques Rousseau,1712,Geneva,1778,Ermenonville,Philosophy,Voltaire,None,The Social Contract,Swiss-French
+Denis Diderot,1713,Langres,1784,Paris,Philosophy,Jean-Jacques Rousseau,None,Encyclopédie,French
+Montesquieu,1689,La Brède,1755,Paris,Political Theory,Voltaire,Bordeaux Academy,Spirit of the Laws,French
+David Hume,1711,Edinburgh,1776,Edinburgh,Philosophy,Adam Smith,University of Edinburgh,Treatise of Human Nature,Scottish
+Adam Smith,1723,Kirkcaldy,1790,Edinburgh,Economics,David Hume,University of Glasgow,Wealth of Nations,Scottish
+Edmund Burke,1729,Dublin,1797,Beaconsfield,Political Philosophy,Adam Smith,None,Reflections on the Revolution,Irish
+Thomas Hobbes,1588,Westport,1679,Hardwick Hall,Philosophy,René Descartes,None,Leviathan,English
+Baruch Spinoza,1632,Amsterdam,1677,The Hague,Philosophy,Gottfried Leibniz,None,Ethics,Dutch-Jewish
+Blaise Pascal,1623,Clermont-Ferrand,1662,Paris,Mathematics,René Descartes,None,Pensées,French
+Pierre de Fermat,1607,Beaumont-de-Lomagne,1665,Castres,Mathematics,Blaise Pascal,Parlement of Toulouse,Last Theorem,French
+John Napier,1550,Merchiston Castle,1617,Edinburgh,Mathematics,Johannes Kepler,None,Mirifici Logarithmorum,Scottish
+Simon Stevin,1548,Bruges,1620,The Hague,Mathematics,Galileo Galilei,States of Holland,Beghinselen der Weeghconst,Flemish
+François Viète,1540,Fontenay-le-Comte,1603,Paris,Mathematics,René Descartes,None,In artem analyticem isagoge,French
+William Gilbert,1544,Colchester,1603,London,Physics,Galileo Galilei,None,De Magnete,English
+Jan Baptist van Helmont,1579,Brussels,1644,Vilvoorde,Chemistry,Robert Boyle,None,Ortus medicinae,Flemish
+Robert Boyle,1627,Lismore,1691,London,Chemistry,Isaac Newton,None,The Sceptical Chymist,Irish
+John Ray,1627,Black Notley,1705,Black Notley,Botany,Carl Linnaeus,None,Historia Plantarum,English
+Marcello Malpighi,1628,Crevalcore,1694,Rome,Medicine,Robert Hooke,University of Bologna,De Pulmonibus,Italian
+Jan Swammerdam,1637,Amsterdam,1680,Amsterdam,Biology,Antonie van Leeuwenhoek,University of Leiden,Biblia Naturae,Dutch
+Antonie van Leeuwenhoek,1632,Delft,1723,Delft,Biology,Jan Swammerdam,None,Arcana Naturae,Dutch
+Nicolas Steno,1638,Copenhagen,1686,Schwerin,Geology,Antonie van Leeuwenhoek,University of Copenhagen,De Solido,Danish
+Edmund Halley,1656,Haggerston,1742,Greenwich,Astronomy,Isaac Newton,Royal Society,Astronomiae Cometicae Synopsis,English
+John Flamsteed,1646,Denby,1719,Greenwich,Astronomy,Edmund Halley,Royal Observatory,Historia Coelestis Britannica,English
+Giovanni Cassini,1625,Perinaldo,1712,Paris,Astronomy,Christiaan Huygens,French Academy of Sciences,Éléments de l'Astronomie,Italian-French
+Ole Rømer,1644,Aarhus,1710,Copenhagen,Astronomy,Christiaan Huygens,University of Copenhagen,Speed of Light,Danish
+James Gregory,1638,Drumoak,1675,Edinburgh,Mathematics,Isaac Newton,University of Edinburgh,Optica Promota,Scottish
+Colin Maclaurin,1698,Kilmodan,1746,Edinburgh,Mathematics,Isaac Newton,University of Edinburgh,Treatise of Fluxions,Scottish
+Brook Taylor,1685,Edmonton,1731,London,Mathematics,Isaac Newton,Royal Society,Methodus Incrementorum,English
+Nicholas Saunderson,1682,Thurlstone,1739,Cambridge,Mathematics,Isaac Newton,Cambridge University,Elements of Algebra,English
+Thomas Sydenham,1624,Wynford Eagle,1689,London,Medicine,Robert Boyle,None,Methodus Curandi Febres,English
+Herman Boerhaave,1668,Voorhout,1738,Leiden,Medicine,Thomas Sydenham,University of Leiden,Institutiones Medicae,Dutch
+Friedrich Hoffmann,1660,Halle,1742,Halle,Medicine,Herman Boerhaave,University of Halle,Medicina Rationalis Systematica,German
+Georg Ernst Stahl,1659,Ansbach,1734,Berlin,Chemistry,Friedrich Hoffmann,University of Halle,Zymotechnia Fundamentalis,German
+Johann Joachim Becher,1635,Speyer,1682,London,Chemistry,Georg Ernst Stahl,None,Physica Subterranea,German
+Nehemiah Grew,1641,Mancetter,1712,London,Botany,John Ray,Royal Society,Anatomy of Plants,English
+John Wilkins,1614,Fawsley,1672,London,Natural Philosophy,Robert Boyle,Oxford University,Mathematical Magick,English
+Samuel Hartlib,1600,Elbing,1662,London,Philosophy,John Wilkins,None,Reformed Commonwelath,Polish-English
+Jan Amos Comenius,1592,Nivnice,1670,Amsterdam,Education,Samuel Hartlib,None,Didactica Magna,Czech
+Isaac Casaubon,1559,Geneva,1614,London,Philology,Jan Amos Comenius,University of Geneva,De rebus sacris et ecclesiasticis,Swiss
+Hugo Grotius,1583,Delft,1645,Rostock,Law,Francis Bacon,Delft,Mare Liberum,Dutch
+Samuel von Pufendorf,1632,Dorfchemnitz,1694,Berlin,Law,Hugo Grotius,University of Heidelberg,De Jure Naturae et Gentium,German
+Justus Lipsius,1547,Overijse,1606,Louvain,Philology,Hugo Grotius,University of Leuven,Politica,Flemish
+Joseph Scaliger,1540,Agen,1609,Leiden,Chronology,Hugo Grotius,University of Leiden,De Emendatione Temporum,French
+Claude Saumaise,1588,Semur-en-Auxois,1653,Spa,Philology,Joseph Scaliger,University of Leiden,Plinianae Exercitationes,French
+Marin Mersenne,1588,Oize,1648,Paris,Mathematics,René Descartes,None,Harmonie Universelle,French
+Pierre Gassendi,1592,Champtercier,1655,Paris,Philosophy,Marin Mersenne,Collège Royal,Syntagma Philosophicum,French
+Thomas Willis,1621,Great Bedwyn,1675,London,Medicine,Robert Hooke,Oxford University,Cerebri Anatome,English
+Richard Lower,1631,Tremeer,1691,London,Medicine,Thomas Willis,Oxford University,Tractatus de Corde,English
+Athanasius Kircher,1602,Geisa,1680,Rome,Natural Philosophy,Galileo Galilei,Collegio Romano,Mundus Subterraneus,German
+Francesco Grimaldi,1618,Bologna,1663,Bologna,Physics,Galileo Galilei,University of Bologna,Physico-Mathesis de Lumine,Italian
+Evangelista Torricelli,1608,Faenza,1647,Florence,Physics,Galileo Galilei,University of Florence,Opera Geometrica,Italian
+Bonaventura Cavalieri,1598,Milan,1647,Bologna,Mathematics,Galileo Galilei,University of Bologna,Geometria Indivisibilibus,Italian
+Gilles de Roberval,1602,Roberval,1675,Paris,Mathematics,Marin Mersenne,Collège Royal,Traité de Mécanique,French
+Girard Desargues,1591,Lyon,1661,Lyon,Mathematics,Marin Mersenne,None,Brouillon project,French
+Guillaume de l'Hôpital,1661,Paris,1704,Paris,Mathematics,Gottfried Leibniz,None,Analyse des infiniment petits,French
+Jakob Bernoulli,1654,Basel,1705,Basel,Mathematics,Gottfried Leibniz,University of Basel,Ars Conjectandi,Swiss
+Johann Bernoulli,1667,Basel,1748,Basel,Mathematics,Jakob Bernoulli,University of Basel,Hydraulica,Swiss
+Abraham de Moivre,1667,Vitry-le-François,1754,London,Mathematics,Isaac Newton,None,The Doctrine of Chances,French-English
+Roger Cotes,1682,Burbage,1716,Cambridge,Mathematics,Isaac Newton,Cambridge University,Harmonia Mensurarum,English
+James Stirling,1692,Garden,1770,Edinburgh,Mathematics,Isaac Newton,None,Methodus Differentialis,Scottish
+Thomas Bayes,1702,London,1761,Tunbridge Wells,Mathematics,Richard Price,None,Bayes Theorem,English
+Richard Price,1723,Llangeinor,1791,London,Philosophy,Thomas Bayes,None,Review of Morals,Welsh
+Erasmus Darwin,1731,Elston,1802,Derby,Natural Philosophy,Carl Linnaeus,None,Zoonomia,English
+Joseph Banks,1743,London,1820,Isleworth,Botany,Carl Linnaeus,Royal Society,Florilegium,English
+Daniel Solander,1733,Pitea,1782,London,Botany,Carl Linnaeus,British Museum,Primitiae Florae,Swedish
+Anders Celsius,1701,Uppsala,1744,Uppsala,Astronomy,Carl Linnaeus,Uppsala University,Temperature Scale,Swedish
+Carolus Clusius,1526,Arras,1609,Leiden,Botany,Francis Bacon,University of Leiden,Rariorum Plantarum Historia,Flemish
+Francesco Redi,1626,Arezzo,1697,Pisa,Biology,Athanasius Kircher,Accademia della Crusca,Esperienze intorno alla generazione,Italian
+Lazzaro Spallanzani,1729,Scandiano,1799,Pavia,Biology,Francesco Redi,University of Pavia,Saggio di osservazioni,Italian

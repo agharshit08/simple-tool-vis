@@ -1,0 +1,466 @@
+'use client';
+
+import { useEffect, useRef, useMemo, useState } from 'react';
+import * as d3 from 'd3';
+import type { ParsedDataset, ColumnType } from '@/lib/csvParser';
+import { useDataset } from '@/context/DatasetContext';
+import { Sparkles, Plus, X } from 'lucide-react';
+
+interface Props {
+  dataset: ParsedDataset;
+  filteredRows: Record<string, string>[];
+}
+
+interface Node { id: string; group: string; count: number; }
+interface Link { source: string; target: string; value: number; }
+
+// Column types that make sense as network nodes
+const ENTITY_TYPES: ColumnType[] = ['entity', 'location', 'category', 'relationship', 'text'];
+
+export default function NetworkGraph({ dataset, filteredRows }: Props) {
+  const { globalDataInsights, isGeneratingGlobalInsights } = useDataset();
+  const svgRef = useRef<SVGSVGElement>(null);
+
+  // Pick default columns: prefer typed entity cols, fall back to any string col
+  const allTextCols = dataset.columns.filter(c => ENTITY_TYPES.includes(c.type));
+  const fallbackCols = dataset.columns.filter(c =>
+    !['number', 'latitude', 'longitude'].includes(c.type)
+  );
+  const candidateCols = allTextCols.length >= 2 ? allTextCols : fallbackCols;
+
+  const [relationships, setRelationships] = useState<{ source: string; target: string }[]>([
+    { source: candidateCols[0]?.name || '', target: candidateCols[1]?.name || '' }
+  ]);
+  const [maxNodes, setMaxNodes] = useState(60);
+  const [showIsolated, setShowIsolated] = useState(false);
+
+  // Update defaults when dataset changes
+  useEffect(() => {
+    const cols = dataset.columns.filter(c => !['number', 'latitude', 'longitude'].includes(c.type));
+    if (cols.length >= 2) {
+      setRelationships([{ source: cols[0].name, target: cols[1].name }]);
+    }
+  }, [dataset.filename]);
+
+  const { nodes, links } = useMemo(() => {
+    const validRels = relationships.filter(r => r.source && r.target && r.source !== r.target);
+    if (validRels.length === 0) return { nodes: [], links: [] };
+
+    const nodeMap = new Map<string, { group: string; count: number }>();
+    const linkMap = new Map<string, number>();
+
+    filteredRows.forEach(row => {
+      validRels.forEach(rel => {
+        const n1 = row[rel.source]?.trim();
+        const n2 = row[rel.target]?.trim();
+        if (!n1 || !n2 || n1 === n2) return;
+
+        if (!nodeMap.has(n1)) nodeMap.set(n1, { group: rel.source, count: 0 });
+        if (!nodeMap.has(n2)) nodeMap.set(n2, { group: rel.target, count: 0 });
+        nodeMap.get(n1)!.count++;
+        nodeMap.get(n2)!.count++;
+
+        const key = [n1, n2].sort().join('|||');
+        linkMap.set(key, (linkMap.get(key) || 0) + 1);
+      });
+    });
+
+    const minCount = showIsolated ? 0 : 1;
+
+    const sortedNodes = [...nodeMap.entries()]
+      .filter(([, { count }]) => count > minCount)
+      .sort((a, b) => b[1].count - a[1].count)
+      .slice(0, maxNodes);
+    const nodeSet = new Set(sortedNodes.map(([id]) => id));
+
+    const nodes: Node[] = sortedNodes.map(([id, { group, count }]) => ({ id, group, count }));
+    const links: Link[] = [...linkMap.entries()]
+      .map(([key, value]) => {
+        const [source, target] = key.split('|||');
+        return { source, target, value };
+      })
+      .filter(l => nodeSet.has(l.source) && nodeSet.has(l.target));
+
+    return { nodes, links };
+  }, [filteredRows, relationships, maxNodes, showIsolated]);
+
+  useEffect(() => {
+    if (!svgRef.current) return;
+
+    const svg = d3.select(svgRef.current);
+    svg.selectAll('*').remove();
+
+    if (nodes.length === 0) return;
+
+    const rect = svgRef.current.parentElement?.getBoundingClientRect();
+    const width = rect?.width || 600;
+    const height = rect?.height || 520;
+
+    svg.attr('viewBox', `0 0 ${width} ${height}`);
+
+    const g = svg.append('g');
+    svg.call(
+      d3.zoom<SVGSVGElement, unknown>()
+        .scaleExtent([0.2, 4])
+        .on('zoom', (event) => g.attr('transform', event.transform)) as any
+    );
+
+    const groups = [...new Set(nodes.map(n => n.group))];
+    const colorScale = d3.scaleOrdinal<string>()
+      .domain(groups)
+      .range(['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#ec4899']);
+
+    const maxCount = Math.max(...nodes.map(n => n.count), 1);
+    const sizeScale = d3.scaleSqrt().domain([0, maxCount]).range([4, 14]);
+    const maxLinkVal = Math.max(...links.map(l => l.value), 1);
+
+    const sim = d3.forceSimulation(nodes as any)
+      .force('link', d3.forceLink(links as any).id((d: any) => d.id).distance(80).strength(0.7))
+      .force('charge', d3.forceManyBody().strength(-180))
+      .force('center', d3.forceCenter(width / 2, height / 2))
+      .force('collision', d3.forceCollide().radius((d: any) => sizeScale(d.count) + 6));
+
+    const defs = svg.append('defs');
+    defs.append('marker')
+      .attr('id', 'arrowhead')
+      .attr('viewBox', '0 -5 10 10')
+      .attr('refX', 18)
+      .attr('refY', 0)
+      .attr('markerWidth', 6)
+      .attr('markerHeight', 6)
+      .attr('orient', 'auto')
+      .append('path')
+      .attr('d', 'M0,-5L10,0L0,5')
+      .attr('fill', '#88888840');
+
+    const link = g.append('g')
+      .selectAll('line')
+      .data(links)
+      .join('line')
+      .attr('stroke', (d) => colorScale(nodes.find(n => n.id === (d.source as any).id || n.id === d.source)?.group || '') + '40')
+      .attr('stroke-width', (d) => 0.8 + (d.value / maxLinkVal) * 3)
+      .attr('stroke-linecap', 'round');
+
+    const node = g.append('g')
+      .selectAll<SVGGElement, Node>('g')
+      .data(nodes)
+      .join('g')
+      .attr('cursor', 'pointer')
+      .call(
+        d3.drag<SVGGElement, Node>()
+          .on('start', (event, d: any) => {
+            if (!event.active) sim.alphaTarget(0.3).restart();
+            d.fx = d.x; d.fy = d.y;
+          })
+          .on('drag', (event, d: any) => { d.fx = event.x; d.fy = event.y; })
+          .on('end', (event, d: any) => {
+            if (!event.active) sim.alphaTarget(0);
+            d.fx = null; d.fy = null;
+          }) as any
+      );
+
+    node.append('circle')
+      .attr('r', d => sizeScale(d.count))
+      .attr('fill', d => colorScale(d.group) + 'e6')
+      .attr('stroke', '#ffffff')
+      .attr('stroke-width', 1.5)
+      .on('mouseover', function (event, d) {
+        d3.select(this).transition().duration(120).attr('r', sizeScale(d.count) + 3).attr('stroke-width', 2.5);
+        showTooltip(event, d);
+      })
+      .on('mousemove', (event) => moveTooltip(event))
+      .on('mouseout', function (event, d) {
+        d3.select(this).transition().duration(120).attr('r', sizeScale(d.count)).attr('stroke-width', 1.5);
+        hideTooltip();
+      });
+
+    node.append('text')
+      .filter(d => d.count >= Math.max(1, maxCount * 0.05))
+      .text(d => d.id.length > 16 ? d.id.slice(0, 15) + '…' : d.id)
+      .attr('x', d => sizeScale(d.count) + 4)
+      .attr('y', 4)
+      .attr('font-size', d => Math.min(11, 8 + (d.count / maxCount) * 3) + 'px')
+      .attr('font-family', 'Inter, sans-serif')
+      .attr('fill', '#334155')
+      .attr('pointer-events', 'none')
+      .attr('paint-order', 'stroke')
+      .attr('stroke', '#ffffff')
+      .attr('stroke-width', 2.5);
+
+    const wrapper = d3.select(svgRef.current.parentElement);
+    const tooltip = wrapper.append('div')
+      .style('position', 'absolute')
+      .style('background', 'rgba(255,255,255,0.95)')
+      .style('backdrop-filter', 'blur(8px)')
+      .style('border', '1px solid rgba(0,0,0,0.1)')
+      .style('box-shadow', '0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06)')
+      .style('border-radius', '8px')
+      .style('padding', '10px 14px')
+      .style('font-family', 'Inter, sans-serif')
+      .style('font-size', '12px')
+      .style('color', '#1e293b')
+      .style('pointer-events', 'none')
+      .style('opacity', '0')
+      .style('transition', 'opacity 0.15s ease')
+      .style('z-index', '100')
+      .style('max-width', '220px');
+
+    function showTooltip(event: MouseEvent, d: Node) {
+      tooltip
+        .style('opacity', '1')
+        .html(`
+          <div style="font-weight:600;color:${colorScale(d.group)};margin-bottom:4px">${d.id}</div>
+          <div style="color:#64748b;font-size:11px">Group: <span style="color:#334155">${d.group}</span></div>
+          <div style="color:#64748b;font-size:11px">Connections: <span style="color:#0f172a;font-weight:600">${d.count}</span></div>
+        `);
+      moveTooltip(event);
+    }
+    function moveTooltip(event: MouseEvent) {
+      const parent = (svgRef.current?.parentElement as HTMLElement);
+      const pr = parent?.getBoundingClientRect();
+      if (!pr) return;
+      tooltip
+        .style('left', (event.clientX - pr.left + 14) + 'px')
+        .style('top', (event.clientY - pr.top - 10) + 'px');
+    }
+    function hideTooltip() { tooltip.style('opacity', '0'); }
+
+    sim.on('tick', () => {
+      link
+        .attr('x1', (d: any) => d.source.x)
+        .attr('y1', (d: any) => d.source.y)
+        .attr('x2', (d: any) => d.target.x)
+        .attr('y2', (d: any) => d.target.y);
+      node.attr('transform', (d: any) => `translate(${d.x},${d.y})`);
+    });
+
+    return () => {
+      sim.stop();
+      tooltip.remove();
+    };
+  }, [nodes, links]);
+
+  const colOptions = dataset.columns.filter(c =>
+    !['latitude', 'longitude', 'number'].includes(c.type)
+  );
+
+  const addRelationship = () => {
+    setRelationships([...relationships, { source: colOptions[0]?.name || '', target: colOptions[1]?.name || '' }]);
+  };
+
+  const updateRelationship = (index: number, field: 'source' | 'target', value: string) => {
+    const newRels = [...relationships];
+    newRels[index][field] = value;
+    setRelationships(newRels);
+  };
+
+  const removeRelationship = (index: number) => {
+    const newRels = relationships.filter((_, i) => i !== index);
+    if (newRels.length === 0) {
+      newRels.push({ source: colOptions[0]?.name || '', target: colOptions[1]?.name || '' });
+    }
+    setRelationships(newRels);
+  };
+
+  return (
+    <div style={{ display: 'flex', gap: '1rem', height: '100%' }}>
+      {/* Main Graph Area */}
+      <div className="network-graph-widget animate-in" style={{ 
+        flex: '1 1 70%',
+        display: 'flex', 
+        flexDirection: 'column',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-lg)',
+        background: 'var(--bg-card)',
+        boxShadow: 'var(--shadow-sm)',
+        overflow: 'hidden'
+      }}>
+        {/* Top panel: Controls */}
+        <div style={{
+          padding: '1rem 1.25rem',
+          borderBottom: '1px solid var(--border)',
+          background: 'var(--bg-main)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+            <h3 style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>Network Relationships</h3>
+            <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div style={{ width: '120px' }}>
+                <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
+                  <span>Max nodes</span>
+                  <span style={{ color: 'var(--text-primary)' }}>{maxNodes}</span>
+                </label>
+                <input
+                  type="range" min={10} max={150} step={10}
+                  value={maxNodes}
+                  onChange={e => setMaxNodes(Number(e.target.value))}
+                  style={{ width: '100%', accentColor: 'var(--text-primary)' }}
+                />
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <span className="badge badge-muted" style={{ fontSize: '0.65rem' }}>{nodes.length} nodes</span>
+                <span className="badge badge-muted" style={{ fontSize: '0.65rem' }}>{links.length} edges</span>
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {relationships.map((rel, index) => (
+              <div key={index} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <select
+                  className="input select"
+                  value={rel.source}
+                  onChange={e => updateRelationship(index, 'source', e.target.value)}
+                  style={{ fontSize: '0.8125rem', padding: '4px 32px 4px 8px', width: '160px', border: '1px solid var(--border)', fontWeight: 500, color: 'var(--text-primary)' }}
+                >
+                  {colOptions.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+                </select>
+                <span style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>→</span>
+                <select
+                  className="input select"
+                  value={rel.target}
+                  onChange={e => updateRelationship(index, 'target', e.target.value)}
+                  style={{ fontSize: '0.8125rem', padding: '4px 32px 4px 8px', width: '160px', border: '1px solid var(--border)', fontWeight: 500, color: 'var(--text-primary)' }}
+                >
+                  {colOptions.map(c => <option key={c.name} value={c.name}>{c.name}</option>)}
+                </select>
+                {relationships.length > 1 && (
+                  <button onClick={() => removeRelationship(index)} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', display: 'flex', padding: '0.25rem' }}>
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+            ))}
+            <div>
+              <button 
+                onClick={addRelationship}
+                style={{ 
+                  display: 'flex', alignItems: 'center', gap: '0.25rem', background: 'none', border: 'none',
+                  color: 'var(--gold)', fontSize: '0.75rem', fontWeight: 600, cursor: 'pointer', padding: '0.25rem 0',
+                  marginTop: '0.25rem'
+                }}
+              >
+                <Plus size={14} /> Add Relationship
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom panel: SVG canvas */}
+        <div style={{ flex: 1, position: 'relative', overflow: 'hidden', background: 'transparent' }}>
+          {nodes.length > 0 ? (
+            <svg
+              ref={svgRef}
+              style={{ width: '100%', height: '100%', display: 'block' }}
+              aria-label="Network graph visualization"
+            />
+          ) : (
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              flexDirection: 'column', gap: '1rem', height: '100%',
+            }}>
+              <div style={{ fontSize: '3rem', opacity: 0.5 }}>🕸️</div>
+              <h3 style={{ fontFamily: 'var(--font-serif)', margin: 0, color: 'var(--text-primary)' }}>No connections found</h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', maxWidth: '340px', textAlign: 'center', lineHeight: 1.5 }}>
+                Configure valid source and target relationships to build the network.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Right Sidebar: AI Suggestions */}
+      <div style={{ 
+        flex: '0 0 30%', 
+        maxWidth: '350px',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius-lg)',
+        background: 'var(--bg-card)',
+        boxShadow: 'var(--shadow-sm)',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden'
+      }}>
+        <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-main)' }}>
+          <h3 style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>Suggested Networks</h3>
+        </div>
+        
+        <div style={{ padding: '1rem', overflowY: 'auto', flex: 1 }}>
+          {isGeneratingGlobalInsights && (
+            <div style={{ textAlign: 'center', padding: '2rem' }}>
+              <div className="spinner" style={{ margin: '0 auto 1rem' }} />
+              <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>Analysing dataset for networks...</p>
+            </div>
+          )}
+
+          {!isGeneratingGlobalInsights && globalDataInsights?.networkRecommendations?.length === 0 && (
+             <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem', fontStyle: 'italic' }}>
+              No specific multi-node networks were recommended for this dataset. You can manually build them on the left.
+             </p>
+          )}
+
+          {!isGeneratingGlobalInsights && globalDataInsights?.networkRecommendations && globalDataInsights.networkRecommendations.map((rec, i) => (
+            <div 
+              key={i} 
+              className="insight-card"
+              onClick={() => setRelationships(rec.relationships)}
+              style={{
+                background: 'var(--bg-main)',
+                border: '1px solid var(--border)',
+                padding: '1rem',
+                borderRadius: 'var(--radius-lg)',
+                marginBottom: '1rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+            >
+              <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+                {rec.reason}
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                {rec.relationships.map((r, ri) => (
+                  <div key={ri} style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <span className="badge badge-gold" style={{ fontSize: '0.7rem', fontFamily: 'var(--font-sans)', textTransform: 'none' }}>{r.source}</span>
+                    <span>→</span>
+                    <span className="badge badge-gold" style={{ fontSize: '0.7rem', fontFamily: 'var(--font-sans)', textTransform: 'none' }}>{r.target}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* Fallback to simple chartRecommendations if networkRecommendations are missing */}
+          {!isGeneratingGlobalInsights && !globalDataInsights?.networkRecommendations?.length && globalDataInsights?.chartRecommendations?.filter(c => c.type === 'network').map((rec, i) => (
+            <div 
+              key={`fallback-${i}`} 
+              className="insight-card"
+              onClick={() => {
+                if (rec.columns.length >= 2) {
+                  setRelationships([{ source: rec.columns[0], target: rec.columns[1] }]);
+                }
+              }}
+              style={{
+                background: 'var(--bg-main)',
+                border: '1px solid var(--border)',
+                padding: '1rem',
+                borderRadius: 'var(--radius-lg)',
+                marginBottom: '1rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+            >
+              <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: '0.75rem', lineHeight: 1.5 }}>
+                {rec.reason}
+              </p>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span className="badge badge-gold" style={{ fontSize: '0.6rem' }}>{rec.columns[0]}</span>
+                <span>→</span>
+                <span className="badge badge-gold" style={{ fontSize: '0.6rem' }}>{rec.columns[1]}</span>
+              </div>
+            </div>
+          ))}
+
+        </div>
+      </div>
+    </div>
+  );
+}
