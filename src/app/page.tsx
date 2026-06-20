@@ -1,100 +1,79 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Database, Map, BarChart, Network, Bot, Clock } from 'lucide-react';
+import { Database, Map, BarChart, Network, Clock, Sparkles } from 'lucide-react';
+import LandingCTA from '@/components/ui/LandingCTA';
 
 export const metadata: Metadata = {
-  title: 'HistoriaVis — Historical Data Visualization for Humanities',
+  title: 'Aeterna — Historical Data Visualization for Humanities',
   description: 'Upload CSV data and explore it through interactive charts, historical geo maps, network graphs, and smart insights.',
 };
 
 const FEATURES = [
   {
-    icon: <Database size={24} color="var(--primary)" />,
-    title: 'CSV Upload & Auto Detection',
-    desc: 'Upload any spreadsheet. Background analysis auto-detects columns — cities, dates, people, relationships — and maps them intelligently.',
+    icon: <Database size={24} strokeWidth={1.5} />,
+    title: 'Intelligent Data Ingestion',
+    desc: 'Drag and drop any historical CSV. Our system automatically detects cities, dates, people, and relationships without complex configuration.',
   },
   {
-    icon: <Map size={24} color="var(--primary)" />,
-    title: 'Historical Geo Maps',
-    desc: 'Plot cities on period-accurate maps. Switch between 1600s, 1700s, and 1800s political borders. Historical names auto-resolved.',
+    icon: <Map size={24} strokeWidth={1.5} />,
+    title: 'Period-Accurate Geo Maps',
+    desc: 'Plot locations on dynamic historical maps. Switch between centuries to see political borders shift alongside your data.',
   },
   {
-    icon: <BarChart size={24} color="var(--primary)" />,
-    title: 'Dynamic Charts',
-    desc: 'Auto-generated bar, line, scatter charts. A global time slider filters all views in sync — watch history unfold.',
+    icon: <Network size={24} strokeWidth={1.5} />,
+    title: 'Force-Directed Networks',
+    desc: 'Uncover hidden connections. Visualize social ties, trade routes, and scholarly correspondence through interactive network graphs.',
   },
   {
-    icon: <Network size={24} color="var(--primary)" />,
-    title: 'Network Analysis',
-    desc: 'Detect relationships between entities. Force-directed graphs reveal social networks, trade routes, and scholarly connections.',
+    icon: <BarChart size={24} strokeWidth={1.5} />,
+    title: 'Dynamic Visualizations',
+    desc: 'Auto-generated charts that respond to a global time slider. Watch trends evolve across decades and centuries in real-time.',
   },
   {
-    icon: <Bot size={24} color="var(--primary)" />,
-    title: 'Smart Insights',
-    desc: 'Smart Insights summarises your dataset, surfaces hidden patterns, and answers natural language questions about your data.',
+    icon: <Sparkles size={24} strokeWidth={1.5} />,
+    title: 'AI-Powered Insights',
+    desc: 'Ask questions in natural language. Our AI summarizes your dataset, surfaces hidden anomalies, and acts as your research assistant.',
   },
   {
-    icon: <Clock size={24} color="var(--primary)" />,
-    title: 'Temporal Exploration',
-    desc: 'Time is a first-class dimension. Filter, animate, and compare data across decades and centuries effortlessly.',
+    icon: <Clock size={24} strokeWidth={1.5} />,
+    title: 'Temporal Navigation',
+    desc: 'Time is a first-class dimension. Seamlessly filter, animate, and compare historical events across eras with precision control.',
   },
 ];
 
-const SAMPLE_DATASETS = [
-  { label: 'European Trade Routes 1580–1720', tag: 'Commerce' },
-  { label: 'Renaissance Scholars Network', tag: 'Prosopography' },
-  { label: 'Roman Empire Archaeological Sites', tag: 'Archaeology' },
-];
+
 
 export default function HomePage() {
   return (
-    <section className="hero gradient-bg" aria-label="HistoriaVis landing page">
-      {/* Eyebrow */}
-      <p className="hero-eyebrow animate-in" aria-hidden="false">
-        Digital Humanities Visualization
-      </p>
+    <section className="hero mesh-bg" aria-label="Aeterna landing page">
+
 
       {/* Heading */}
-      <h1 className="animate-in-delay-1">
-        Turn Historical Data into<br />
-        <span className="accent">Vivid Discoveries</span>
+      <h1 className="hero-title animate-in-delay-1">
+        Unearth the Stories<br />
+        Hidden in Your <span className="accent">Data</span>
       </h1>
 
       <p className="hero-desc animate-in-delay-2">
-        Upload CSV data and explore it through interactive charts, historical geo maps, network graphs, 
-        and smart insights — built for historians, archaeologists, and digital humanists.
+        A seamless visual workspace for historians, archaeologists, and researchers. 
+        Transform static spreadsheets into vivid maps, interactive networks, and AI-driven discoveries.
       </p>
 
       {/* CTA */}
-      <div className="hero-cta animate-in-delay-3">
-        <Link href="/upload" className="btn btn-primary btn-lg" id="cta-upload">
-          📜 Upload Your Dataset
-        </Link>
-        <Link href="/dashboard" className="btn btn-ghost btn-lg" id="cta-demo">
-          📊 View Demo Dashboard
-        </Link>
-      </div>
+      <LandingCTA />
 
       {/* Feature Cards */}
-      <div className="features-grid animate-in-delay-3">
-        {FEATURES.map((f) => (
-          <article key={f.title} className="feature-card" aria-label={f.title}>
-            <span className="feature-icon" aria-hidden="true">{f.icon}</span>
+      <div className="features-grid">
+        {FEATURES.map((f, i) => (
+          <article key={f.title} className={`premium-card stagger-${(i % 6) + 1}`} aria-label={f.title}>
+            <div className="icon-box" aria-hidden="true">{f.icon}</div>
             <h4>{f.title}</h4>
             <p>{f.desc}</p>
           </article>
         ))}
       </div>
 
-      {/* Sample datasets teaser */}
-      <div style={{ marginTop: '3rem', display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
-        <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>Try sample data:</span>
-        {SAMPLE_DATASETS.map(ds => (
-          <Link href="/upload" key={ds.label} className="badge badge-gold" style={{ cursor: 'pointer', textDecoration: 'none' }}>
-            {ds.tag}: {ds.label}
-          </Link>
-        ))}
-      </div>
+
     </section>
   );
 }

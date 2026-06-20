@@ -25,8 +25,6 @@ import { useDataset } from "@/context/DatasetContext";
 import { Play, Map as MapIcon, X, MapPin, Database, Search } from "lucide-react";
 
 const MAP_STYLES = {
-  dark: { name: "CARTO Dark", url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" },
-  light: { name: "CARTO Light", url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png" },
   voyager: { name: "CARTO Voyager", url: "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" },
   physical: { name: "Terrain Physical", url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}" },
   topo: { name: "Esri Topo (Blue Ocean)", url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}" },
@@ -86,8 +84,8 @@ export default function HistoricalMapView({ dataset, filteredRows }: Props) {
     setMappingAbortController,
   } = useDataset();
 
-  const [era, setEra] = useState<HistoricalEra>("1600s");
-  const [mapStyle, setMapStyle] = useState<MapStyleKey>("dark");
+  const [era, setEra] = useState<HistoricalEra>("modern");
+  const [mapStyle, setMapStyle] = useState<MapStyleKey>("voyager");
   const [geoJson, setGeoJson] = useState<any>(null);
   const [geoJsonKey, setGeoJsonKey] = useState(0);
   const [markers, setMarkers] = useState<MarkerData[]>([]);
@@ -98,10 +96,9 @@ export default function HistoricalMapView({ dataset, filteredRows }: Props) {
 
   // Auto-set era from selected year
   useEffect(() => {
-    // If we have a global selectedYear, use that to guess era. Otherwise default to 1600s or previous era.
-    const year = selectedYear || 1620;
-    const newEra = getEraForYear(year);
-    setEra(newEra);
+    if (selectedYear) {
+      setEra(getEraForYear(selectedYear));
+    }
   }, [selectedYear]);
 
   // Load GeoJSON boundaries
@@ -152,9 +149,9 @@ export default function HistoricalMapView({ dataset, filteredRows }: Props) {
       .filter(Boolean);
     const uniqueLocations = [...new Set(allLocations)];
 
-    // Filter out ones we already have
+    // Filter out ones we already have (including ones that failed and returned null)
     const pendingLocations = uniqueLocations.filter(
-      (loc) => !geocodedLocations[loc],
+      (loc) => geocodedLocations[loc] === undefined,
     );
 
     if (pendingLocations.length === 0) return; // Nothing to do
@@ -303,7 +300,7 @@ export default function HistoricalMapView({ dataset, filteredRows }: Props) {
   }, [dataset.rows, selectedLocCols]);
 
   const unmappedCount = useMemo(() => {
-    return allLocs.filter((l) => !geocodedLocations[l]).length;
+    return allLocs.filter((l) => geocodedLocations[l] === undefined).length;
   }, [allLocs, geocodedLocations]);
 
   const filteredMarkers = useMemo(
@@ -980,23 +977,10 @@ export default function HistoricalMapView({ dataset, filteredRows }: Props) {
                 background: "var(--bg-main)",
               }}
             >
-              <div style={{ marginBottom: "6px", display: "flex", alignItems: "center", gap: "8px", color: "var(--text-muted)" }}>
-                <MapPin size={14} style={{ color: "var(--primary)" }} />
-                <span>
-                  {selectedMarker.lat.toFixed(4)},{" "}
-                  {selectedMarker.lng.toFixed(4)}
-                </span>
-              </div>
-              <div style={{ marginBottom: "6px", display: "flex", alignItems: "center", gap: "8px", color: "var(--text-muted)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-muted)" }}>
                 <Database size={14} style={{ color: "var(--primary)" }} />
                 <span style={{ fontWeight: 500, color: "var(--text-primary)" }}>
                   {selectedMarker.count} records
-                </span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "var(--text-muted)" }}>
-                <Search size={14} style={{ color: "var(--primary)" }} />
-                <span>
-                  Matched via: <strong style={{ color: "var(--text-primary)" }}>{selectedMarker.source}</strong>
                 </span>
               </div>
             </div>

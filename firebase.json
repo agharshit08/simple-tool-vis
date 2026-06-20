@@ -15,5 +15,16 @@
   },
   "remoteconfig": {
     "template": "remote_config.json"
+  },
+  "auth": {
+    "providers": {
+      "googleSignIn": {
+        "oAuthBrandDisplayName": "HistoriaVis",
+        "supportEmail": "harshit.agrawal@gmail.com",
+        "authorizedRedirectUris": [
+          "http://localhost"
+        ]
+      }
+    }
   }
 }

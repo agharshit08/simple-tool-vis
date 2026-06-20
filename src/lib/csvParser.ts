@@ -210,7 +210,19 @@ export async function detectColumnsAI(dataset: ParsedDataset): Promise<ParsedDat
     columns: newColumnInfos,
     networkRecommendations: networkRecs
   };
-  enrichedDataset.insights = aiInsights || generateInsightsHeuristics(enrichedDataset);
+
+  if (aiInsights) {
+    if (!aiInsights.chartRecommendations || aiInsights.chartRecommendations.length === 0) {
+      const heuristics = generateInsightsHeuristics(enrichedDataset);
+      aiInsights.chartRecommendations = heuristics.chartRecommendations;
+      if (!aiInsights.summary) aiInsights.summary = heuristics.summary;
+      if (!aiInsights.keyFindings || aiInsights.keyFindings.length === 0) aiInsights.keyFindings = heuristics.keyFindings;
+      if (!aiInsights.suggestions || aiInsights.suggestions.length === 0) aiInsights.suggestions = heuristics.suggestions;
+    }
+    enrichedDataset.insights = aiInsights;
+  } else {
+    enrichedDataset.insights = generateInsightsHeuristics(enrichedDataset);
+  }
 
   return enrichedDataset;
 }
@@ -280,7 +292,8 @@ export function generateInsightsHeuristics(dataset: ParsedDataset): any {
   const fallbackChartRecs = insights.slice(0, 3).map(i => ({
     type: i.chartType.toLowerCase(),
     columns: [i.xCol, i.yCol],
-    reason: i.description
+    reason: i.description,
+    aggregation: i.aggregation
   }));
 
   return {

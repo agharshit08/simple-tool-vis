@@ -71,10 +71,14 @@ export default function UploadPage() {
       setAvailableSheets([]);
       setPendingFile(null);
       
-      // Kick off background AI analysis
       setAnalyzingColumns(true);
       detectColumnsAI(result).then((enrichedDataset) => {
-        setDataset(prev => prev ? { ...prev, columns: enrichedDataset.columns } : null);
+        setDataset(prev => prev ? { 
+          ...prev, 
+          columns: enrichedDataset.columns,
+          insights: enrichedDataset.insights,
+          networkRecommendations: enrichedDataset.networkRecommendations
+        } : null);
         setAnalyzingColumns(false);
       }).catch(err => {
         console.error('Background AI failed:', err);
@@ -172,7 +176,7 @@ export default function UploadPage() {
       </div>
 
       <p style={{ color: 'var(--text-muted)', marginBottom: '1rem', fontSize: '0.9375rem' }} className="animate-in-delay-1">
-        Upload a CSV or Excel file containing your data. HistoriaVis will automatically detect column types
+        Upload a CSV or Excel file containing your data. Aeterna will automatically detect column types
         and prepare your data for visualisation across maps, charts, and network graphs.
       </p>
 

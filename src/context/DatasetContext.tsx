@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, ReactNode, useMemo, useRef, useCallback } from 'react';
 import type { ParsedDataset, SuggestedInsight } from '@/lib/csvParser';
-import type { DataInsight } from '@/lib/aiInsights';
+import type { DataInsight, DataChat, ChatMessage } from '@/lib/aiInsights';
 import type { GeoResult } from '@/lib/geocoder';
 
 interface DatasetContextType {
@@ -33,6 +33,12 @@ interface DatasetContextType {
   setMappingProgress: (p: number) => void;
   mappingAbortController: AbortController | null;
   setMappingAbortController: (ac: AbortController | null) => void;
+  
+  // Chat State
+  chatMessages: ChatMessage[];
+  setChatMessages: (msgs: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => void;
+  chatInstance: DataChat | null;
+  setChatInstance: (chat: DataChat | null) => void;
 }
 
 const DatasetContext = createContext<DatasetContextType>({
@@ -61,6 +67,10 @@ const DatasetContext = createContext<DatasetContextType>({
   setMappingProgress: () => {},
   mappingAbortController: null,
   setMappingAbortController: () => {},
+  chatMessages: [],
+  setChatMessages: () => {},
+  chatInstance: null,
+  setChatInstance: () => {},
 });
 
 export function DatasetProvider({ children }: { children: ReactNode }) {
@@ -77,6 +87,10 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
   const [mappingProgress, setMappingProgress] = useState(0);
   const [mappingAbortController, setMappingAbortController] = useState<AbortController | null>(null);
 
+  // Chat State
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+  const [chatInstance, setChatInstance] = useState<DataChat | null>(null);
+
   // Wrap setDataset to cancel mapping if the dataset changes entirely
   const setDataset = useCallback((action: ParsedDataset | null | ((prev: ParsedDataset | null) => ParsedDataset | null)) => {
     setDatasetState((prev) => {
@@ -87,6 +101,8 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
         setGeocodedLocations({});
         setIsMapping(false);
         setMappingProgress(0);
+        setChatMessages([]);
+        setChatInstance(null);
       }
       return newDataset;
     });
@@ -135,7 +151,9 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
       geocodedLocations, setGeocodedLocations,
       isMapping, setIsMapping,
       mappingProgress, setMappingProgress,
-      mappingAbortController, setMappingAbortController
+      mappingAbortController, setMappingAbortController,
+      chatMessages, setChatMessages,
+      chatInstance, setChatInstance
     }}>
       {children}
     </DatasetContext.Provider>

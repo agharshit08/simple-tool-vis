@@ -147,7 +147,7 @@ Example Output format:
         const encoded = encodeURIComponent(city);
         const res = await fetch(
           `https://nominatim.openstreetmap.org/search?q=${encoded}&format=json&limit=1&namedetails=1`,
-          { headers: { 'User-Agent': 'HistoriaVis/1.0' } }
+          { headers: { 'User-Agent': 'Aeterna/1.0' } }
         );
         const data = await res.json();
         if (data.length > 0) {
@@ -162,6 +162,13 @@ Example Output format:
       } catch (e) {
         // Ignored
       }
+    }
+  }
+
+  // Explicitly mark unresolved cities as null so caller knows we attempted them
+  for (const city of unresolvedCities) {
+    if (results[city] === undefined) {
+      results[city] = null;
     }
   }
 

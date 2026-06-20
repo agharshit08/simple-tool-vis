@@ -279,7 +279,12 @@ export default function ChartPanel({ dataset, filteredRows }: Props) {
               <button
                 key={i}
                 onClick={() => {
-                  setChartType(insight.chartType);
+                  let t: ChartType = 'Bar';
+                  const lower = (insight.chartType || '').toLowerCase();
+                  if (lower.includes('line')) t = 'Line';
+                  else if (lower.includes('scatter')) t = 'Scatter';
+                  
+                  setChartType(t);
                   setAggregation(insight.aggregation);
                   setTimeout(() => {
                     setXCol(insight.xCol);

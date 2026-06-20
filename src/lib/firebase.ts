@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAI, GoogleAIBackend } from 'firebase/ai';
+import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
   projectId: "simple-tool-visualisation",
@@ -16,6 +17,7 @@ const firebaseConfig = {
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
+export const auth = getAuth(app);
 
 // Firebase AI Logic — Gemini Developer API (free tier)
 export const ai = getAI(app, { backend: new GoogleAIBackend() });
