@@ -76,10 +76,10 @@ const HISTORICAL_ALIASES: Record<string, { lat: number; lng: number; modern: str
 export async function geocodeCitiesBulk(
   cities: string[],
   year?: number
-): Promise<Record<string, GeoResult>> {
+): Promise<Record<string, GeoResult | null>> {
   if (!cities.length) return {};
   
-  const results: Record<string, GeoResult> = {};
+  const results: Record<string, GeoResult | null> = {};
   
   // 1. Resolve using local aliases first
   const unresolvedCities: string[] = [];

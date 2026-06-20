@@ -1,5 +1,6 @@
 {
   "hosting": {
+    "site": "simple-tool-visualisation",
     "public": "out",
     "ignore": [
       "firebase.json",

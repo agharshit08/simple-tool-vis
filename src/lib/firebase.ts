@@ -2,6 +2,7 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
 import { getAI, GoogleAIBackend } from 'firebase/ai';
 import { getAuth } from 'firebase/auth';
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'firebase/app-check';
 
 const firebaseConfig = {
   projectId: "simple-tool-visualisation",
@@ -15,6 +16,19 @@ const firebaseConfig = {
 
 // Prevent duplicate Firebase app initialisation in Next.js dev (HMR)
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+
+// Initialize Firebase App Check
+if (typeof window !== "undefined") {
+  // Allow local development to work with a debug token
+  if (process.env.NODE_ENV !== "production") {
+    (window as any).FIREBASE_APPCHECK_DEBUG_TOKEN = true;
+  }
+
+  initializeAppCheck(app, {
+    provider: new ReCaptchaEnterpriseProvider(process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""),
+    isTokenAutoRefreshEnabled: true
+  });
+}
 
 export const db = getFirestore(app);
 export const auth = getAuth(app);

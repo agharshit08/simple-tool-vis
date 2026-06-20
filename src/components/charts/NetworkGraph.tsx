@@ -4,11 +4,13 @@ import { useEffect, useRef, useMemo, useState } from 'react';
 import * as d3 from 'd3';
 import type { ParsedDataset, ColumnType } from '@/lib/csvParser';
 import { useDataset } from '@/context/DatasetContext';
-import { Sparkles, Plus, X } from 'lucide-react';
+import { Sparkles, Plus, X, Maximize, Minimize } from 'lucide-react';
 
 interface Props {
   dataset: ParsedDataset;
   filteredRows: Record<string, string>[];
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
 }
 
 interface Node { id: string; group: string; count: number; }
@@ -17,7 +19,7 @@ interface Link { source: string; target: string; value: number; }
 // Column types that make sense as network nodes
 const ENTITY_TYPES: ColumnType[] = ['entity', 'location', 'category', 'relationship', 'text'];
 
-export default function NetworkGraph({ dataset, filteredRows }: Props) {
+export default function NetworkGraph({ dataset, filteredRows, isFullscreen, onToggleFullscreen }: Props) {
   const { globalDataInsights, isGeneratingGlobalInsights } = useDataset();
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -298,7 +300,19 @@ export default function NetworkGraph({ dataset, filteredRows }: Props) {
           background: 'var(--bg-main)'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>Network Relationships</h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <h3 style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>Network Relationships</h3>
+              {onToggleFullscreen && (
+                <button 
+                  onClick={onToggleFullscreen} 
+                  className="btn btn-ghost btn-sm" 
+                  style={{ padding: '4px', height: 'auto', minHeight: 'auto', color: 'var(--text-muted)' }}
+                  title={isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
+                >
+                  {isFullscreen ? <Minimize size={16} /> : <Maximize size={16} />}
+                </button>
+              )}
+            </div>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', marginRight: '0.5rem' }}>
                 <input 
@@ -397,18 +411,19 @@ export default function NetworkGraph({ dataset, filteredRows }: Props) {
       </div>
 
       {/* Right Sidebar: AI Suggestions */}
-      <div style={{ 
-        flex: '0 0 30%', 
-        maxWidth: '350px',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-lg)',
-        background: 'var(--bg-card)',
-        boxShadow: 'var(--shadow-sm)',
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden'
-      }}>
-        <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-main)' }}>
+      {!isFullscreen && (
+        <div className="network-insights-sidebar animate-in" style={{ 
+          flex: '0 0 30%', 
+          maxWidth: '350px',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-lg)',
+          background: 'var(--bg-card)',
+          boxShadow: 'var(--shadow-sm)',
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden'
+        }}>
+          <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'var(--bg-main)' }}>
           <h3 style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>Suggested Networks</h3>
         </div>
         
@@ -489,6 +504,7 @@ export default function NetworkGraph({ dataset, filteredRows }: Props) {
 
         </div>
       </div>
+      )}
     </div>
   );
 }

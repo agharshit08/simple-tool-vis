@@ -15,7 +15,6 @@ export default function Navbar() {
   return (
     <nav className="navbar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <Link href="/" className="navbar-brand" aria-label="Aeterna Home">
-        <Image src="/logo.png" alt="Aeterna Logo" width={28} height={28} className="logo-icon" style={{ borderRadius: '4px' }} />
         <span className="logo-text">Aeterna</span>
       </Link>
 

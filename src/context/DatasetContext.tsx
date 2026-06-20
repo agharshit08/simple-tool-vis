@@ -25,8 +25,8 @@ interface DatasetContextType {
   deleteRow: (row: Record<string, string>) => void;
   
   // Mapping State
-  geocodedLocations: Record<string, GeoResult>;
-  setGeocodedLocations: (locs: Record<string, GeoResult> | ((prev: Record<string, GeoResult>) => Record<string, GeoResult>)) => void;
+  geocodedLocations: Record<string, GeoResult | null>;
+  setGeocodedLocations: (locs: Record<string, GeoResult | null> | ((prev: Record<string, GeoResult | null>) => Record<string, GeoResult | null>)) => void;
   isMapping: boolean;
   setIsMapping: (m: boolean) => void;
   mappingProgress: number;
@@ -82,7 +82,7 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
   const [hiddenColumns, setHiddenColumns] = useState<string[]>([]);
   
   // Mapping State
-  const [geocodedLocations, setGeocodedLocations] = useState<Record<string, GeoResult>>({});
+  const [geocodedLocations, setGeocodedLocations] = useState<Record<string, GeoResult | null>>({});
   const [isMapping, setIsMapping] = useState(false);
   const [mappingProgress, setMappingProgress] = useState(0);
   const [mappingAbortController, setMappingAbortController] = useState<AbortController | null>(null);

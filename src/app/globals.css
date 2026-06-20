@@ -1028,6 +1028,14 @@ p { color: var(--text-secondary); line-height: 1.7; }
   padding: var(--space-6);
 }
 
+.workspace-center.fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  border-radius: 0;
+  padding: 2rem;
+}
+
 .workspace-sidebar-right {
   width: 400px;
   flex-shrink: 0;

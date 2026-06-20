@@ -152,7 +152,7 @@ export async function detectColumnsAI(dataset: ParsedDataset): Promise<ParsedDat
   const allColumns = dataset.columns.map(c => ({ name: c.name, samples: c.sample }));
   const validTypes = ['date', 'year', 'location', 'latitude', 'longitude', 'entity', 'number', 'boolean', 'category', 'text', 'relationship'];
   let parsedTypes: Record<string, string> = {};
-  let aiInsights: SuggestedInsight[] | undefined;
+  let aiInsights: any;
   let networkRecs: any[] | undefined;
 
   try {

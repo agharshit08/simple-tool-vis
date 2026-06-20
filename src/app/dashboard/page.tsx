@@ -42,6 +42,7 @@ export default function DashboardPage() {
 
   const [isRightPaneExpanded, setIsRightPaneExpanded] = useState(false);
   const [activeTool, setActiveTool] = useState<RightTool>('columns');
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Time column selector
   const [selectedYearCol, setSelectedYearCol] = useState<string | null>(null);
@@ -251,7 +252,7 @@ export default function DashboardPage() {
       </aside>
 
       {/* Center Workspace */}
-      <main className="workspace-center" style={{ position: 'relative' }}>
+      <main className={`workspace-center ${isFullscreen ? 'fullscreen' : ''}`}>
         
         {/* Global Mapping Notification Toast */}
         {showMappingToast && (
@@ -306,7 +307,12 @@ export default function DashboardPage() {
         )}
         {activeView === 'network' && (
           <div className="animate-in" style={{ height: '100%', position: 'relative' }}>
-            <NetworkGraph dataset={dataset} filteredRows={filteredRows} />
+            <NetworkGraph 
+              dataset={dataset} 
+              filteredRows={filteredRows} 
+              isFullscreen={isFullscreen}
+              onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+            />
           </div>
         )}
       </main>
