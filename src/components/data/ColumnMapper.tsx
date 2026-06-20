@@ -12,10 +12,10 @@ export default function ColumnMapper() {
   if (!dataset) return null;
 
   const updateColumnType = (colName: string, newType: ColumnType) => {
-    setDataset({
-      ...dataset,
-      columns: dataset.columns.map(c => c.name === colName ? { ...c, type: newType } : c),
-    });
+    setDataset(prev => prev ? {
+      ...prev,
+      columns: prev.columns.map(c => c.name === colName ? { ...c, type: newType } : c),
+    } : null);
   };
 
   const toggleColumnVisibility = (colName: string) => {

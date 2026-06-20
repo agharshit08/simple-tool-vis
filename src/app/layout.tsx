@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import Navbar from '@/components/layout/Navbar';
 import { DatasetProvider } from '@/context/DatasetContext';
+import MappingToast from '@/components/layout/MappingToast';
 
 export const metadata: Metadata = {
   title: 'HistoriaVis — Historical Data Visualization for Humanities',
@@ -21,6 +22,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <DatasetProvider>
           <div className="app-layout">
             <Navbar />
+            <MappingToast />
             <main className="app-main">
               <div className="app-content">
                 {children}

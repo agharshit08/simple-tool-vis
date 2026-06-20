@@ -962,7 +962,7 @@ p { color: var(--text-secondary); line-height: 1.7; }
 }
 
 .workspace-sidebar-right {
-  width: 320px;
+  width: 400px;
   flex-shrink: 0;
   border-left: 1px solid var(--border);
   background: var(--bg-card);
@@ -973,8 +973,9 @@ p { color: var(--text-secondary); line-height: 1.7; }
 }
 
 .workspace-sidebar-right.collapsed {
-  width: 72px;
-  align-items: center;
+  width: 0px;
+  border-left: none;
+  overflow: hidden;
 }
 
 .workspace-sidebar-right .sidebar-content {

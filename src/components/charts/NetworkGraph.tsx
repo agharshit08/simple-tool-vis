@@ -33,6 +33,7 @@ export default function NetworkGraph({ dataset, filteredRows }: Props) {
   ]);
   const [maxNodes, setMaxNodes] = useState(60);
   const [showIsolated, setShowIsolated] = useState(false);
+  const [colorByUnique, setColorByUnique] = useState(false);
 
   // Update defaults when dataset changes
   useEffect(() => {
@@ -106,9 +107,19 @@ export default function NetworkGraph({ dataset, filteredRows }: Props) {
     );
 
     const groups = [...new Set(nodes.map(n => n.group))];
+    const uniqueIds = nodes.map(n => n.id);
+    const colorDomain = colorByUnique ? uniqueIds : groups;
+    
+    // Default palette for column-based coloring
+    const defaultRange = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#ec4899'];
+    // Generated palette for unique nodes
+    const range = colorByUnique 
+      ? d3.quantize(t => d3.interpolateRainbow(t * 0.8 + 0.1), Math.max(uniqueIds.length, 2))
+      : defaultRange;
+
     const colorScale = d3.scaleOrdinal<string>()
-      .domain(groups)
-      .range(['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#ec4899']);
+      .domain(colorDomain)
+      .range(range);
 
     const maxCount = Math.max(...nodes.map(n => n.count), 1);
     const sizeScale = d3.scaleSqrt().domain([0, maxCount]).range([4, 14]);
@@ -137,7 +148,11 @@ export default function NetworkGraph({ dataset, filteredRows }: Props) {
       .selectAll('line')
       .data(links)
       .join('line')
-      .attr('stroke', (d) => colorScale(nodes.find(n => n.id === (d.source as any).id || n.id === d.source)?.group || '') + '40')
+      .attr('stroke', (d) => {
+        const sourceNode = nodes.find(n => n.id === (d.source as any).id || n.id === d.source);
+        return colorScale(colorByUnique ? (sourceNode?.id || '') : (sourceNode?.group || ''));
+      })
+      .attr('stroke-opacity', 0.35)
       .attr('stroke-width', (d) => 0.8 + (d.value / maxLinkVal) * 3)
       .attr('stroke-linecap', 'round');
 
@@ -161,7 +176,8 @@ export default function NetworkGraph({ dataset, filteredRows }: Props) {
 
     node.append('circle')
       .attr('r', d => sizeScale(d.count))
-      .attr('fill', d => colorScale(d.group) + 'e6')
+      .attr('fill', d => colorScale(colorByUnique ? d.id : d.group))
+      .attr('fill-opacity', 0.9)
       .attr('stroke', '#ffffff')
       .attr('stroke-width', 1.5)
       .on('mouseover', function (event, d) {
@@ -209,7 +225,7 @@ export default function NetworkGraph({ dataset, filteredRows }: Props) {
       tooltip
         .style('opacity', '1')
         .html(`
-          <div style="font-weight:600;color:${colorScale(d.group)};margin-bottom:4px">${d.id}</div>
+          <div style="font-weight:600;color:${colorScale(colorByUnique ? d.id : d.group)};margin-bottom:4px">${d.id}</div>
           <div style="color:#64748b;font-size:11px">Group: <span style="color:#334155">${d.group}</span></div>
           <div style="color:#64748b;font-size:11px">Connections: <span style="color:#0f172a;font-weight:600">${d.count}</span></div>
         `);
@@ -238,7 +254,7 @@ export default function NetworkGraph({ dataset, filteredRows }: Props) {
       sim.stop();
       tooltip.remove();
     };
-  }, [nodes, links]);
+  }, [nodes, links, colorByUnique]);
 
   const colOptions = dataset.columns.filter(c =>
     !['latitude', 'longitude', 'number'].includes(c.type)
@@ -284,6 +300,18 @@ export default function NetworkGraph({ dataset, filteredRows }: Props) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <h3 style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>Network Relationships</h3>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', marginRight: '0.5rem' }}>
+                <input 
+                  type="checkbox" 
+                  id="colorByUnique" 
+                  checked={colorByUnique} 
+                  onChange={e => setColorByUnique(e.target.checked)} 
+                  style={{ accentColor: 'var(--text-primary)', width: '14px', height: '14px' }}
+                />
+                <label htmlFor="colorByUnique" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', cursor: 'pointer', userSelect: 'none' }}>
+                  Unique Colors
+                </label>
+              </div>
               <div style={{ width: '120px' }}>
                 <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
                   <span>Max nodes</span>

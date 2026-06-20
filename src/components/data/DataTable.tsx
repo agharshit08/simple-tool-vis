@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import type { ParsedDataset } from '@/lib/csvParser';
 import { useDataset } from '@/context/DatasetContext';
-import { MoreVertical, Trash2 } from 'lucide-react';
+import { MoreVertical, Trash2, ArrowUpDown, Search } from 'lucide-react';
 
 interface Props {
   dataset: ParsedDataset;
@@ -13,6 +13,8 @@ interface Props {
 export default function DataTable({ dataset, filteredRows }: Props) {
   const { hiddenColumns, deleteRow } = useDataset();
   const [menuOpenIndex, setMenuOpenIndex] = useState<number | null>(null);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
+  const [globalFilter, setGlobalFilter] = useState('');
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -27,9 +29,61 @@ export default function DataTable({ dataset, filteredRows }: Props) {
 
   const visibleColumns = dataset.columns.filter(col => !hiddenColumns.includes(col.name));
 
+  const sortedAndFilteredRows = useMemo(() => {
+    let result = filteredRows;
+
+    if (globalFilter.trim() !== '') {
+      const lowerFilter = globalFilter.toLowerCase();
+      result = result.filter(row => 
+        visibleColumns.some(col => String(row[col.name] || '').toLowerCase().includes(lowerFilter))
+      );
+    }
+
+    if (sortConfig) {
+      result = [...result].sort((a, b) => {
+        const valA = a[sortConfig.key] || '';
+        const valB = b[sortConfig.key] || '';
+        
+        const numA = Number(valA);
+        const numB = Number(valB);
+        if (!isNaN(numA) && !isNaN(numB) && valA !== '' && valB !== '') {
+          return sortConfig.direction === 'asc' ? numA - numB : numB - numA;
+        }
+
+        return sortConfig.direction === 'asc' 
+          ? String(valA).localeCompare(String(valB))
+          : String(valB).localeCompare(String(valA));
+      });
+    }
+
+    return result;
+  }, [filteredRows, visibleColumns, sortConfig, globalFilter]);
+
+  const handleSort = (key: string) => {
+    setSortConfig(prev => {
+      if (prev?.key === key) {
+        if (prev.direction === 'asc') return { key, direction: 'desc' };
+        return null; // toggle off
+      }
+      return { key, direction: 'asc' };
+    });
+  };
+
   return (
     <div className="data-table-container">
-      <div className="data-table-wrapper" style={{ maxHeight: 'calc(100vh - 200px)', overflowY: 'auto' }}>
+      <div style={{ padding: '0.75rem 1rem', display: 'flex', justifyContent: 'flex-end', borderBottom: '1px solid var(--border)', background: 'var(--bg-surface)' }}>
+        <div style={{ position: 'relative', width: '250px' }}>
+          <Search size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+          <input 
+            type="text" 
+            placeholder="Search all columns..." 
+            value={globalFilter}
+            onChange={e => setGlobalFilter(e.target.value)}
+            style={{ width: '100%', padding: '0.4rem 0.5rem 0.4rem 28px', fontSize: '0.8125rem', borderRadius: '4px', border: '1px solid var(--border)', background: 'var(--bg-deep)', color: 'var(--text-primary)', outline: 'none' }}
+          />
+        </div>
+      </div>
+      <div className="data-table-wrapper" style={{ maxHeight: 'calc(100vh - 250px)', overflowY: 'auto' }}>
         <table className="data-table" aria-label="Complete data view">
           <thead>
             <tr>
@@ -37,12 +91,34 @@ export default function DataTable({ dataset, filteredRows }: Props) {
                 <span style={{ opacity: 0 }}>...</span>
               </th>
               {visibleColumns.map(col => (
-                <th key={col.name} scope="col">{col.name}</th>
+                <th 
+                  key={col.name} 
+                  scope="col"
+                  onClick={() => handleSort(col.name)}
+                  style={{ cursor: 'pointer', userSelect: 'none', transition: 'background 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'var(--bg-surface)'}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+                    {col.name}
+                    <ArrowUpDown size={12} style={{ 
+                      opacity: sortConfig?.key === col.name ? 1 : 0.2,
+                      color: sortConfig?.key === col.name ? 'var(--gold)' : 'inherit'
+                    }} />
+                  </div>
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {filteredRows.slice(0, 100).map((row, i) => {
+            {sortedAndFilteredRows.length === 0 ? (
+              <tr>
+                <td colSpan={visibleColumns.length + 1} style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--text-muted)' }}>
+                  No rows match your search.
+                </td>
+              </tr>
+            ) : (
+              sortedAndFilteredRows.map((row, i) => {
               const isActive = menuOpenIndex === i;
               return (
               <tr 
@@ -147,14 +223,9 @@ export default function DataTable({ dataset, filteredRows }: Props) {
                 ))}
               </tr>
               );
-            })}
+            }))}
           </tbody>
         </table>
-        {filteredRows.length > 100 && (
-          <div style={{ textAlign: 'center', padding: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-            Displaying first 100 rows for performance.
-          </div>
-        )}
       </div>
     </div>
   );

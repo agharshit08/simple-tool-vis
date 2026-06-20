@@ -74,7 +74,7 @@ export default function UploadPage() {
       // Kick off background AI analysis
       setAnalyzingColumns(true);
       detectColumnsAI(result).then((enrichedDataset) => {
-        setDataset(enrichedDataset);
+        setDataset(prev => prev ? { ...prev, columns: enrichedDataset.columns } : null);
         setAnalyzingColumns(false);
       }).catch(err => {
         console.error('Background AI failed:', err);
@@ -145,7 +145,7 @@ export default function UploadPage() {
       
       setAnalyzingColumns(true);
       detectColumnsAI(result).then((enrichedDataset) => {
-        setDataset(enrichedDataset);
+        setDataset(prev => prev ? { ...prev, columns: enrichedDataset.columns } : null);
       }).catch(err => {
         console.error('Background AI failed:', err);
       }).finally(() => {

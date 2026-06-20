@@ -1,12 +1,13 @@
 'use client';
 
-import { createContext, useContext, useState, ReactNode, useMemo } from 'react';
+import { createContext, useContext, useState, ReactNode, useMemo, useRef, useCallback } from 'react';
 import type { ParsedDataset, SuggestedInsight } from '@/lib/csvParser';
 import type { DataInsight } from '@/lib/aiInsights';
+import type { GeoResult } from '@/lib/geocoder';
 
 interface DatasetContextType {
   dataset: ParsedDataset | null;
-  setDataset: (d: ParsedDataset | null) => void;
+  setDataset: (d: ParsedDataset | null | ((prev: ParsedDataset | null) => ParsedDataset | null)) => void;
   yearRange: [number, number];
   setYearRange: (r: [number, number]) => void;
   selectedYear: number | null;
@@ -22,6 +23,16 @@ interface DatasetContextType {
   globalDataInsights: DataInsight | null;
   isGeneratingGlobalInsights: boolean;
   deleteRow: (row: Record<string, string>) => void;
+  
+  // Mapping State
+  geocodedLocations: Record<string, GeoResult>;
+  setGeocodedLocations: (locs: Record<string, GeoResult> | ((prev: Record<string, GeoResult>) => Record<string, GeoResult>)) => void;
+  isMapping: boolean;
+  setIsMapping: (m: boolean) => void;
+  mappingProgress: number;
+  setMappingProgress: (p: number) => void;
+  mappingAbortController: AbortController | null;
+  setMappingAbortController: (ac: AbortController | null) => void;
 }
 
 const DatasetContext = createContext<DatasetContextType>({
@@ -42,15 +53,44 @@ const DatasetContext = createContext<DatasetContextType>({
   globalDataInsights: null,
   isGeneratingGlobalInsights: false,
   deleteRow: () => {},
+  geocodedLocations: {},
+  setGeocodedLocations: () => {},
+  isMapping: false,
+  setIsMapping: () => {},
+  mappingProgress: 0,
+  setMappingProgress: () => {},
+  mappingAbortController: null,
+  setMappingAbortController: () => {},
 });
 
 export function DatasetProvider({ children }: { children: ReactNode }) {
-  const [dataset, setDataset] = useState<ParsedDataset | null>(null);
+  const [dataset, setDatasetState] = useState<ParsedDataset | null>(null);
   const [yearRange, setYearRange] = useState<[number, number]>([1400, 2000]);
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [researchContext, setResearchContext] = useState<string>('');
   const [isAnalyzingColumns, setAnalyzingColumns] = useState<boolean>(false);
   const [hiddenColumns, setHiddenColumns] = useState<string[]>([]);
+  
+  // Mapping State
+  const [geocodedLocations, setGeocodedLocations] = useState<Record<string, GeoResult>>({});
+  const [isMapping, setIsMapping] = useState(false);
+  const [mappingProgress, setMappingProgress] = useState(0);
+  const [mappingAbortController, setMappingAbortController] = useState<AbortController | null>(null);
+
+  // Wrap setDataset to cancel mapping if the dataset changes entirely
+  const setDataset = useCallback((action: ParsedDataset | null | ((prev: ParsedDataset | null) => ParsedDataset | null)) => {
+    setDatasetState((prev) => {
+      const newDataset = typeof action === 'function' ? action(prev) : action;
+      // If we are setting a completely new dataset (not just updating rows/insights)
+      if (prev && newDataset && prev.filename !== newDataset.filename) {
+        if (mappingAbortController) mappingAbortController.abort();
+        setGeocodedLocations({});
+        setIsMapping(false);
+        setMappingProgress(0);
+      }
+      return newDataset;
+    });
+  }, [mappingAbortController]);
 
   const globalDataInsights = useMemo(() => {
     if (!dataset || !dataset.insights) return null;
@@ -78,7 +118,7 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
   const deleteRow = (rowToDelete: Record<string, string>) => {
     if (!dataset) return;
     const newRows = dataset.rows.filter(r => r !== rowToDelete);
-    setDataset({ ...dataset, rows: newRows, rowCount: newRows.length });
+    setDatasetState({ ...dataset, rows: newRows, rowCount: newRows.length });
   };
 
   return (
@@ -91,7 +131,11 @@ export function DatasetProvider({ children }: { children: ReactNode }) {
       hiddenColumns, setHiddenColumns,
       suggestedInsights, setSuggestedInsights: () => {},
       globalDataInsights, isGeneratingGlobalInsights,
-      deleteRow
+      deleteRow,
+      geocodedLocations, setGeocodedLocations,
+      isMapping, setIsMapping,
+      mappingProgress, setMappingProgress,
+      mappingAbortController, setMappingAbortController
     }}>
       {children}
     </DatasetContext.Provider>

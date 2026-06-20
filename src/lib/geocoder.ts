@@ -1,6 +1,5 @@
-import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { getGenerativeModel } from 'firebase/ai';
-import { db, ai } from './firebase';
+import { ai } from './firebase';
 
 export interface GeoResult {
   lat: number;
@@ -73,111 +72,99 @@ const HISTORICAL_ALIASES: Record<string, { lat: number; lng: number; modern: str
   'frankfurt': { lat: 50.1109, lng: 8.6821, modern: 'Frankfurt' },
 };
 
-// Geocode cache in Firestore to avoid repeat AI calls
-async function getCachedGeocode(cityKey: string): Promise<GeoResult | null> {
-  try {
-    const ref = doc(db, 'geocache', cityKey.replace(/[^a-z0-9]/g, '_'));
-    const snap = await getDoc(ref);
-    if (snap.exists()) return snap.data() as GeoResult;
-  } catch { /* offline or permissions */ }
-  return null;
-}
-
-async function cacheGeocode(cityKey: string, result: GeoResult): Promise<void> {
-  try {
-    const ref = doc(db, 'geocache', cityKey.replace(/[^a-z0-9]/g, '_'));
-    await setDoc(ref, result);
-  } catch { /* offline or permissions */ }
-}
-
-// Tier 2: Ask Gemini for historical city coordinates
-async function geocodeWithGemini(cityName: string, year?: number): Promise<GeoResult | null> {
-  try {
-    const model = getGenerativeModel(ai, { model: 'gemini-2.0-flash' });
-    const yearContext = year ? ` as it existed around the year ${year}` : '';
-    const prompt = `Give me the modern geographic coordinates (latitude and longitude) of the historical city or place named "${cityName}"${yearContext}.
-Only respond with JSON in this exact format, no other text:
-{"lat": 41.0082, "lng": 28.9784, "resolvedName": "Istanbul (modern name)"}
-If you cannot determine the location, respond with: {"lat": null, "lng": null, "resolvedName": null}`;
-
-    const result = await model.generateContent(prompt);
-    const text = result.response.text().trim().replace(/```json\n?|\n?```/g, '').trim();
-    const parsed = JSON.parse(text);
-    if (parsed.lat && parsed.lng) {
-      return { lat: parsed.lat, lng: parsed.lng, resolvedName: parsed.resolvedName || cityName, source: 'gemini' };
-    }
-  } catch (e) {
-    console.warn('Gemini geocoding failed:', e);
-  }
-  return null;
-}
-
-// Tier 3: Nominatim fallback
-async function geocodeWithNominatim(cityName: string): Promise<GeoResult | null> {
-  try {
-    const encoded = encodeURIComponent(cityName);
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encoded}&format=json&limit=1&namedetails=1`,
-      { headers: { 'User-Agent': 'HistoriaVis/1.0' } }
-    );
-    const data = await res.json();
-    if (data.length > 0) {
-      return {
-        lat: parseFloat(data[0].lat),
-        lng: parseFloat(data[0].lon),
-        resolvedName: data[0].display_name.split(',')[0],
-        source: 'nominatim',
-      };
-    }
-  } catch (e) {
-    console.warn('Nominatim geocoding failed:', e);
-  }
-  return null;
-}
-
-export async function geocodeCity(cityName: string, year?: number): Promise<GeoResult | null> {
-  if (!cityName?.trim()) return null;
-  const key = cityName.trim().toLowerCase();
-
-  // Tier 1: Built-in alias table
-  const alias = HISTORICAL_ALIASES[key];
-  if (alias) {
-    return { lat: alias.lat, lng: alias.lng, resolvedName: alias.modern, source: 'alias' };
-  }
-
-  // Check Firestore cache
-  const cached = await getCachedGeocode(key);
-  if (cached) return cached;
-
-  // Tier 2: Gemini AI
-  const geminiResult = await geocodeWithGemini(cityName, year);
-  if (geminiResult) {
-    await cacheGeocode(key, geminiResult);
-    return geminiResult;
-  }
-
-  // Tier 3: Nominatim
-  const nominatimResult = await geocodeWithNominatim(cityName);
-  if (nominatimResult) {
-    await cacheGeocode(key, nominatimResult);
-    return nominatimResult;
-  }
-
-  return null;
-}
-
-export async function geocodeCities(
+// Batch AI Geocoding
+export async function geocodeCitiesBulk(
   cities: string[],
-  year?: number,
-  onProgress?: (done: number, total: number) => void
-): Promise<Map<string, GeoResult | null>> {
-  const unique = [...new Set(cities.filter(Boolean))];
-  const results = new Map<string, GeoResult | null>();
-  for (let i = 0; i < unique.length; i++) {
-    results.set(unique[i], await geocodeCity(unique[i], year));
-    onProgress?.(i + 1, unique.length);
-    // Nominatim rate limit: 1 req/sec
-    await new Promise(r => setTimeout(r, 250));
+  year?: number
+): Promise<Record<string, GeoResult>> {
+  if (!cities.length) return {};
+  
+  const results: Record<string, GeoResult> = {};
+  
+  // 1. Resolve using local aliases first
+  const unresolvedCities: string[] = [];
+  for (const city of cities) {
+    if (!city || !city.trim()) continue;
+    const key = city.trim().toLowerCase();
+    const alias = HISTORICAL_ALIASES[key];
+    if (alias) {
+      results[city] = { lat: alias.lat, lng: alias.lng, resolvedName: alias.modern, source: 'alias' };
+    } else {
+      unresolvedCities.push(city);
+    }
   }
+
+  if (unresolvedCities.length === 0) {
+    return results;
+  }
+
+  // 2. Resolve the rest in bulk with Gemini
+  try {
+    const model = getGenerativeModel(ai, { model: 'gemini-3.5-flash' });
+    const yearContext = year ? ` as they existed around the year ${year}` : '';
+    const prompt = `Give me the modern geographic coordinates (latitude and longitude) of the following historical cities or places${yearContext}.
+    
+Locations to geocode:
+${JSON.stringify(unresolvedCities)}
+
+Only respond with a valid JSON object where the keys are the EXACT location names provided above, and the values are objects with "lat", "lng", and "resolvedName".
+If you cannot determine a location, omit it from the response.
+
+Example Output format:
+{
+  "Edo": {"lat": 35.6762, "lng": 139.6503, "resolvedName": "Tokyo"},
+  "Smyrna": {"lat": 38.4192, "lng": 27.1287, "resolvedName": "Izmir"}
+}`;
+
+    const res = await model.generateContent(prompt);
+    const text = res.response.text().trim().replace(/\`\`\`json\n?|\n?\`\`\`/g, '').trim();
+    
+    try {
+      const parsed = JSON.parse(text);
+      for (const [cityName, data] of Object.entries(parsed)) {
+        const d = data as any;
+        if (d && typeof d.lat === 'number' && typeof d.lng === 'number') {
+          results[cityName] = {
+            lat: d.lat,
+            lng: d.lng,
+            resolvedName: d.resolvedName || cityName,
+            source: 'gemini'
+          };
+        }
+      }
+    } catch (parseError) {
+      console.warn('Failed to parse Gemini bulk geocoding response:', parseError);
+    }
+    
+  } catch (e) {
+    console.warn('Gemini bulk geocoding failed:', e);
+  }
+
+  // 3. Fallback to Nominatim for any still unresolved (limited to avoid rate limiting)
+  for (const city of unresolvedCities) {
+    if (!results[city]) {
+      try {
+        const encoded = encodeURIComponent(city);
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encoded}&format=json&limit=1&namedetails=1`,
+          { headers: { 'User-Agent': 'HistoriaVis/1.0' } }
+        );
+        const data = await res.json();
+        if (data.length > 0) {
+          results[city] = {
+            lat: parseFloat(data[0].lat),
+            lng: parseFloat(data[0].lon),
+            resolvedName: data[0].display_name.split(',')[0],
+            source: 'nominatim',
+          };
+        }
+        await new Promise(r => setTimeout(r, 250)); // Nominatim rate limit
+      } catch (e) {
+        // Ignored
+      }
+    }
+  }
+
   return results;
 }
+

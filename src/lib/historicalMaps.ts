@@ -11,7 +11,7 @@ export interface EraConfig {
 
 export const ERA_CONFIGS: Record<HistoricalEra, EraConfig> = {
   modern: {
-    label: 'Modern (2000s)',
+    label: 'Current (Modern)',
     yearRange: [1900, 2100],
     tileUrl: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     tileAttribution: '&copy; <a href="https://carto.com/">CartoDB</a>',

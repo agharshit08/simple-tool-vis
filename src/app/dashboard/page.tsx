@@ -9,7 +9,7 @@ import TimelineSlider from '@/components/data/TimelineSlider';
 import AIInsightsPanel from '@/components/ai/InsightsPanel';
 import Link from 'next/link';
 import InfoTooltip from '@/components/ui/InfoTooltip';
-import { Compass, TableProperties, BarChart3, Map as MapIcon, Network, ChevronLeft, ChevronRight, Database, Columns, Bot, MessageSquare, UploadCloud } from 'lucide-react';
+import { Compass, TableProperties, BarChart3, Map as MapIcon, Network, ChevronLeft, ChevronRight, Database, Columns, Bot, X, UploadCloud } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 const ChartPanel = dynamic(() => import('@/components/charts/ChartPanel'), { ssr: false });
@@ -20,12 +20,26 @@ type ViewMode = 'data' | 'charts' | 'map' | 'network';
 type RightTool = 'columns' | 'ai';
 
 export default function DashboardPage() {
-  const { dataset, selectedYear, setSelectedYear, isAnalyzingColumns } = useDataset();
+  const { dataset, selectedYear, setSelectedYear, isAnalyzingColumns, isMapping, mappingProgress } = useDataset();
   const router = useRouter();
   const [activeView, setActiveView] = useState<ViewMode>('data');
   
   // Collapse states
   const [isLeftPaneExpanded, setIsLeftPaneExpanded] = useState(true);
+
+  // Mapping Completion Toast State
+  const [showMappingToast, setShowMappingToast] = useState(false);
+  const prevIsMappingRef = useRef(isMapping);
+
+  useEffect(() => {
+    if (prevIsMappingRef.current && !isMapping && mappingProgress === 100) {
+      setShowMappingToast(true);
+      const t = setTimeout(() => setShowMappingToast(false), 4000);
+      return () => clearTimeout(t);
+    }
+    prevIsMappingRef.current = isMapping;
+  }, [isMapping, mappingProgress]);
+
   const [isRightPaneExpanded, setIsRightPaneExpanded] = useState(false);
   const [activeTool, setActiveTool] = useState<RightTool>('columns');
 
@@ -145,23 +159,23 @@ export default function DashboardPage() {
             <button 
               className={`workspace-nav-btn ${activeView === 'data' ? 'active' : ''}`}
               onClick={() => setActiveView('data')}
-              title="Complete Data"
+              title="Data"
             >
               <TableProperties size={20} />
-              <span className="nav-label">Complete Data</span>
+              <span className="nav-label">Data</span>
             </button>
             <button 
               className={`workspace-nav-btn ${activeView === 'charts' ? 'active' : ''}`}
               onClick={() => setActiveView('charts')}
-              title="Charts & Dashboards"
+              title="Charts"
             >
               <BarChart3 size={20} />
-              <span className="nav-label">Charts & Dashboards</span>
+              <span className="nav-label">Charts</span>
             </button>
             <button 
               className={`workspace-nav-btn ${activeView === 'map' ? 'active' : ''}`}
               onClick={() => setActiveView('map')}
-              title="Geo Map"
+              title="Map"
             >
               <MapIcon size={20} />
               <span className="nav-label">Geo Map</span>
@@ -175,6 +189,40 @@ export default function DashboardPage() {
               <span className="nav-label">Network Graph</span>
             </button>
           </nav>
+
+          <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border)', width: '100%' }}>
+            <div style={{ paddingLeft: isLeftPaneExpanded ? 'var(--space-4)' : '0', marginBottom: '0.75rem', color: 'var(--text-muted)', display: isLeftPaneExpanded ? 'block' : 'none' }}>
+              <h3 style={{ margin: 0, fontSize: '0.8125rem', fontWeight: 500, fontFamily: 'var(--font-sans)' }}>
+                Configuration
+              </h3>
+            </div>
+            <nav style={{ width: '100%' }}>
+              <button 
+                className={`workspace-nav-btn ${activeTool === 'columns' && isRightPaneExpanded ? 'active' : ''}`}
+                onClick={() => { setActiveTool('columns'); setIsRightPaneExpanded(true); }}
+                title="Column Settings"
+              >
+                <Columns size={20} />
+                <span className="nav-label">Column Settings</span>
+              </button>
+            </nav>
+            
+            <div style={{ paddingLeft: isLeftPaneExpanded ? 'var(--space-4)' : '0', marginBottom: '0.75rem', marginTop: '1.5rem', color: 'var(--text-muted)', display: isLeftPaneExpanded ? 'block' : 'none' }}>
+              <h3 style={{ margin: 0, fontSize: '0.8125rem', fontWeight: 500, fontFamily: 'var(--font-sans)' }}>
+                Analysis Tools
+              </h3>
+            </div>
+            <nav style={{ width: '100%' }}>
+              <button 
+                className={`workspace-nav-btn ${activeTool === 'ai' && isRightPaneExpanded ? 'active' : ''}`}
+                onClick={() => { setActiveTool('ai'); setIsRightPaneExpanded(true); }}
+                title="AI Insights"
+              >
+                <Bot size={20} />
+                <span className="nav-label">AI Insights</span>
+              </button>
+            </nav>
+          </div>
         </div>
 
         <div style={{ marginTop: 'auto', paddingTop: '2rem', borderTop: '1px solid var(--border)', width: '100%' }}>
@@ -203,7 +251,23 @@ export default function DashboardPage() {
       </aside>
 
       {/* Center Workspace */}
-      <main className="workspace-center">
+      <main className="workspace-center" style={{ position: 'relative' }}>
+        
+        {/* Global Mapping Notification Toast */}
+        {showMappingToast && (
+          <div style={{
+            position: 'absolute', top: '16px', right: '16px', zIndex: 9999,
+            background: 'var(--primary)', color: 'white', padding: '12px 24px',
+            borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            display: 'flex', alignItems: 'center', gap: '8px',
+            animation: 'slideIn 0.3s ease forwards',
+            fontWeight: 500, fontSize: '0.875rem'
+          }}>
+            <MapIcon size={18} />
+            Coordinates mapped successfully!
+          </div>
+        )}
+
         {/* Timeline Slider (now shown everywhere) */}
         {(selectedYearCol || isAnalyzingColumns) && (
           <TimelineSlider 
@@ -249,77 +313,28 @@ export default function DashboardPage() {
 
       {/* Right Sidebar Toolkit */}
       <aside className={`workspace-sidebar-right ${isRightPaneExpanded ? '' : 'collapsed'}`}>
-        {/* Toggle Button */}
-        <button 
-          className="sidebar-toggle-btn" 
-          onClick={() => setIsRightPaneExpanded(!isRightPaneExpanded)}
-          style={{ width: '100%', marginBottom: '1rem', background: isRightPaneExpanded ? 'transparent' : 'var(--bg-hover)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '0.25rem' }}
-          title="Toggle Context Toolkit"
-        >
-          {isRightPaneExpanded ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-        </button>
-
-        {/* Toolkit Nav (When collapsed) */}
-        {!isRightPaneExpanded && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%', alignItems: 'center' }}>
-            <button 
-              className={`sidebar-toggle-btn ${activeTool === 'columns' ? 'active-tool' : ''}`}
-              onClick={() => { setActiveTool('columns'); setIsRightPaneExpanded(true); }}
-              title="Column Data Types"
-              style={{ display: 'flex', justifyContent: 'center', padding: '0.5rem' }}
-            >
-              <Columns size={20} />
-            </button>
-            <button 
-              className={`sidebar-toggle-btn ${activeTool === 'ai' ? 'active-tool' : ''}`}
-              onClick={() => { setActiveTool('ai'); setIsRightPaneExpanded(true); }}
-              title="Analysis Toolkit"
-              style={{ display: 'flex', justifyContent: 'center', padding: '0.5rem' }}
-            >
-              <Bot size={20} />
-            </button>
-          </div>
-        )}
-
         {/* Toolkit Content (When Expanded) */}
-        <div className="sidebar-content">
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-            <button 
-              className={`btn btn-sm ${activeTool === 'columns' ? 'btn-primary' : 'btn-ghost'}`}
-              onClick={() => setActiveTool('columns')}
-              style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '0.25rem', justifyContent: 'center' }}
-            >
-              <Columns size={16} /> Columns
-            </button>
-            <button 
-              className={`btn btn-sm ${activeTool === 'ai' ? 'btn-primary' : 'btn-ghost'}`}
-              onClick={() => setActiveTool('ai')}
-              style={{ flex: 1, padding: '0 0.5rem' }}
-            >
-              <Bot size={16} /> Analysis Toolkit
-            </button>
-          </div>
-
+        <div className="sidebar-content" style={{ padding: activeTool === 'ai' ? '0' : '1.5rem', width: '400px', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+          {activeTool === 'columns' && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1rem', fontFamily: 'var(--font-serif)', color: 'var(--text-primary)' }}>
+                Column Settings
+              </h3>
+            </div>
+          )}
+          
+          <button 
+            className="btn btn-ghost btn-sm" 
+            onClick={() => setIsRightPaneExpanded(false)}
+            style={{ padding: '0.25rem', position: 'absolute', top: '0.75rem', right: '0.75rem', zIndex: 50 }}
+            title="Close Panel"
+          >
+            <X size={16} />
+          </button>
           {activeTool === 'columns' && <ColumnMapper />}
           {activeTool === 'ai' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
               <AIInsightsPanel dataset={dataset} filteredRows={filteredRows} />
-              
-              <div className="panel-section" style={{ borderStyle: 'dashed' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                  <MessageSquare size={16} color="var(--text-muted)" />
-                  <h4 style={{ margin: 0, fontSize: '0.875rem' }}>Chat with Data</h4>
-                  <div style={{ marginLeft: 'auto' }}>
-                    <InfoTooltip content="Soon you will be able to ask natural language questions about your data here." position="left" />
-                  </div>
-                </div>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                  Ask questions about your dataset.
-                </p>
-                <div className="input" style={{ opacity: 0.5, fontSize: '0.75rem', padding: '0.5rem' }}>
-                  Ask a question... (Coming soon)
-                </div>
-              </div>
             </div>
           )}
         </div>

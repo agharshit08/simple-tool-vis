@@ -1,103 +1,130 @@
-import { getGenerativeModel } from 'firebase/ai';
 import { ai } from './firebase';
+import { getGenerativeModel, getTemplateGenerativeModel } from 'firebase/ai';
 import type { ParsedDataset } from './csvParser';
+import { AI_CONFIG } from './constants';
 
 export interface DataInsight {
   summary: string;
   keyFindings: string[];
   patterns: string[];
-  suggestions: string[];
+  anomalies: string[];
+  suggestedQuestions: string[];
   chartRecommendations: { type: string; columns: string[]; reason: string }[];
-  networkRecommendations?: { relationships: { source: string; target: string }[]; reason: string }[];
+  networkRecommendations: { relationships: { source: string; target: string }[]; reason: string }[];
+  researchHypothesis: string;
 }
 
-export interface QAResponse {
-  answer: string;
-  confidence: 'high' | 'medium' | 'low';
-  followUp?: string;
+export interface ChatMessage {
+  role: 'user' | 'model';
+  text: string;
+  media?: string; // Base64 data URL for UI rendering
 }
 
-function buildDataContext(dataset: ParsedDataset): string {
-  const colSummary = dataset.columns.map(c =>
-    `"${c.name}" (type: ${c.type}, samples: ${c.sample.slice(0, 3).join(', ')})`
-  ).join('\n');
-  const sampleRows = dataset.rows.slice(0, 10);
-  let ctxStr = `Dataset: "${dataset.filename}" — ${dataset.rowCount} records\n`;
+export interface DataChat {
+  sendMessage(question: string, fileData?: { dataUrl: string; base64: string; mimeType: string }): Promise<string>;
+  getHistory(): ChatMessage[];
+  reset(): void;
+}
+
+export function buildCompactDataContext(dataset: ParsedDataset): string {
+  const lines: string[] = [];
+
+  lines.push(`File: ${dataset.filename}`);
+  lines.push(`Rows: ${dataset.rowCount}`);
   if (dataset.researchContext) {
-    ctxStr += `\nResearch Context / Goals provided by user:\n"${dataset.researchContext}"\n\n`;
+    lines.push(`Context: ${dataset.researchContext}`);
   }
-  ctxStr += `Columns:\n${colSummary}\nSample rows (first 10):\n${JSON.stringify(sampleRows, null, 2)}`;
-  return ctxStr;
+
+  lines.push('');
+  lines.push('Columns: ' + dataset.columns.map(c => `${c.name}(${c.type})`).join(', '));
+
+  const nonEmptyCols = dataset.columns.filter(col => {
+    const filled = dataset.rows.filter(r => r[col.name]?.trim()).length;
+    return filled / dataset.rowCount > 0.2;
+  });
+
+  const colNames = nonEmptyCols.map(c => c.name);
+  lines.push('');
+  lines.push(colNames.join('|'));
+
+  const MAX_ROWS = AI_CONFIG.MAX_CONTEXT_ROWS;
+  let sampledRows = dataset.rows;
+  
+  if (dataset.rows.length > MAX_ROWS) {
+    const step = dataset.rows.length / MAX_ROWS;
+    sampledRows = [];
+    for (let i = 0; i < MAX_ROWS; i++) {
+      sampledRows.push(dataset.rows[Math.floor(i * step)]);
+    }
+  }
+
+  for (let i = 0; i < sampledRows.length; i++) {
+    const row = sampledRows[i];
+    const vals = colNames.map(name => {
+      const v = row[name] ?? '';
+      return v.length > 50 ? v.slice(0, 50) + '…' : v;
+    });
+    lines.push(vals.join('|'));
+  }
+
+  return lines.join('\n');
 }
 
 export async function generateInsights(dataset: ParsedDataset): Promise<DataInsight> {
-  const model = getGenerativeModel(ai, { model: 'gemini-2.0-flash' });
-  const context = buildDataContext(dataset);
+  const model = getTemplateGenerativeModel(ai);
+  const dataContext = buildCompactDataContext(dataset);
 
-  const prompt = `You are an expert data analyst and researcher.
-Analyze this dataset and provide insights, tailored to the user's research context if provided.
+  const result = await model.generateContent('dataset-insights', {
+    dataContext,
+  });
 
-${context}
-
-Respond ONLY with valid JSON, no markdown fences:
-{
-  "summary": "2-3 sentence overview of what this dataset contains and its historical significance",
-  "keyFindings": ["finding 1", "finding 2", "finding 3"],
-  "patterns": ["pattern or trend observed 1", "pattern 2"],
-  "suggestions": ["research question this data could answer 1", "suggestion 2"],
-  "chartRecommendations": [
-    {"type": "bar|line|scatter|map", "columns": ["col1", "col2"], "reason": "why this chart fits"}
-  ],
-  "networkRecommendations": [
-    {
-      "relationships": [
-        {"source": "ColumnA", "target": "ColumnB"},
-        {"source": "ColumnB", "target": "ColumnC"}
-      ],
-      "reason": "Why exploring this multi-node relationship chain is interesting"
-    }
-  ]
-}`;
-
-  const result = await model.generateContent(prompt);
   const text = result.response.text().trim().replace(/```json\n?|\n?```/g, '').trim();
   return JSON.parse(text) as DataInsight;
 }
 
-export async function askQuestion(dataset: ParsedDataset, question: string): Promise<QAResponse> {
-  const model = getGenerativeModel(ai, { model: 'gemini-2.0-flash' });
-  const context = buildDataContext(dataset);
+export function createDataChat(dataset: ParsedDataset): DataChat {
+  const model = getGenerativeModel(ai, {
+    model: 'gemini-2.5-flash',
+    systemInstruction: 'You are a data analyst. Answer questions about this dataset concisely. If the user provides an image, factor it into your response.',
+  });
 
-  const prompt = `You are a data analysis AI assistant. A researcher is asking about their dataset.
+  const dataContext = buildCompactDataContext(dataset);
+  const seedUser = `Here is the dataset I want to discuss:\n\n${dataContext}`;
+  const seedModel = `I have analyzed your dataset "${dataset.filename}" with ${dataset.rowCount} rows and ${dataset.columns.length} columns. Ask me anything about it.`;
 
-${context}
+  const baseHistory = [
+    { role: 'user' as const, parts: [{ text: seedUser }] },
+    { role: 'model' as const, parts: [{ text: seedModel }] },
+  ];
 
-Researcher's question: "${question}"
+  let chat = model.startChat({ history: [...baseHistory] });
+  let messages: ChatMessage[] = [];
 
-Analyze the data carefully and answer the question. If exact numbers are needed, compute from the sample rows.
-Respond ONLY with valid JSON:
-{
-  "answer": "detailed answer to the question, referencing specific data points",
-  "confidence": "high|medium|low",
-  "followUp": "optional: a related question the researcher might want to explore"
-}`;
+  return {
+    async sendMessage(question: string, fileData?: { dataUrl: string; base64: string; mimeType: string }): Promise<string> {
+      messages.push({ role: 'user', text: question, media: fileData?.dataUrl });
+      
+      let payload: string | Array<string | any> = question;
+      if (fileData) {
+        payload = [
+          question,
+          { inlineData: { data: fileData.base64, mimeType: fileData.mimeType } }
+        ];
+      }
 
-  const result = await model.generateContent(prompt);
-  const text = result.response.text().trim().replace(/```json\n?|\n?```/g, '').trim();
-  return JSON.parse(text) as QAResponse;
-}
+      const result = await chat.sendMessage(payload);
+      const reply = result.response.text();
+      messages.push({ role: 'model', text: reply });
+      return reply;
+    },
 
-export async function detectAnomalies(dataset: ParsedDataset): Promise<string[]> {
-  const model = getGenerativeModel(ai, { model: 'gemini-2.0-flash' });
-  const context = buildDataContext(dataset);
+    getHistory(): ChatMessage[] {
+      return [...messages];
+    },
 
-  const prompt = `You are an expert data analyst. Identify any anomalies, outliers, or interesting patterns in this dataset, keeping any provided research context in mind.
-${context}
-
-Respond ONLY with a JSON array of strings (max 5 items):
-["anomaly or interesting observation 1", "anomaly 2"]`;
-
-  const result = await model.generateContent(prompt);
-  const text = result.response.text().trim().replace(/```json\n?|\n?```/g, '').trim();
-  return JSON.parse(text) as string[];
+    reset(): void {
+      chat = model.startChat({ history: [...baseHistory] });
+      messages = [];
+    },
+  };
 }
