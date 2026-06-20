@@ -291,13 +291,16 @@ export default function NetworkGraph({ dataset, filteredRows, isFullscreen, onTo
         borderRadius: 'var(--radius-lg)',
         background: 'var(--bg-card)',
         boxShadow: 'var(--shadow-sm)',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        position: 'relative'
       }}>
-        {/* Top panel: Controls */}
-        <div style={{
+        {/* Controls Panel */}
+        <div className={isFullscreen ? `floating-widget floating-bottom-right` : ''} style={{
           padding: '1rem 1.25rem',
-          borderBottom: '1px solid var(--border)',
-          background: 'var(--bg-main)'
+          borderBottom: isFullscreen ? 'none' : '1px solid var(--border)',
+          background: 'var(--bg-card)',
+          width: isFullscreen ? '450px' : 'auto',
+          ...(isFullscreen ? { position: 'absolute' as any, bottom: 0, right: 0 } : {})
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -325,22 +328,6 @@ export default function NetworkGraph({ dataset, filteredRows, isFullscreen, onTo
                 <label htmlFor="colorByUnique" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', cursor: 'pointer', userSelect: 'none' }}>
                   Unique Colors
                 </label>
-              </div>
-              <div style={{ width: '120px' }}>
-                <label style={{ fontSize: '0.65rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>
-                  <span>Max nodes</span>
-                  <span style={{ color: 'var(--text-primary)' }}>{maxNodes}</span>
-                </label>
-                <input
-                  type="range" min={10} max={150} step={10}
-                  value={maxNodes}
-                  onChange={e => setMaxNodes(Number(e.target.value))}
-                  style={{ width: '100%', accentColor: 'var(--text-primary)' }}
-                />
-              </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <span className="badge badge-muted" style={{ fontSize: '0.65rem' }}>{nodes.length} nodes</span>
-                <span className="badge badge-muted" style={{ fontSize: '0.65rem' }}>{links.length} edges</span>
               </div>
             </div>
           </div>

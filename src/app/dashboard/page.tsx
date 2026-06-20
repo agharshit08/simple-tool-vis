@@ -280,6 +280,7 @@ export default function DashboardPage() {
             setStartYear={setStartYear} setEndYear={setEndYear}
             playing={playing} setPlaying={setPlaying}
             visibleCount={filteredRows.length}
+            isFloating={activeView === 'network' && isFullscreen}
           />
         )}
 

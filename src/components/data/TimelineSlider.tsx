@@ -18,12 +18,13 @@ interface Props {
   playing: boolean;
   setPlaying: (p: boolean | ((p: boolean) => boolean)) => void;
   visibleCount: number;
+  isFloating?: boolean;
 }
 
 export default function TimelineSlider({
   dataset, selectedCol, setSelectedCol,
   minYear, maxYear, startYear, endYear, setStartYear, setEndYear,
-  playing, setPlaying, visibleCount
+  playing, setPlaying, visibleCount, isFloating
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState<'start' | 'end' | null>(null);
@@ -65,22 +66,30 @@ export default function TimelineSlider({
 
   const { isAnalyzingColumns } = useDataset();
 
+  const baseContainerStyle: React.CSSProperties = {
+    background: 'var(--bg-main)',
+    borderBottom: '1px solid var(--border)',
+    padding: '1.25rem 2rem',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '2rem',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
+    position: 'relative',
+    width: '100%'
+  };
+
+  const floatingClass = isFloating ? `floating-widget floating-bottom-left` : '';
+  const mergedStyle = isFloating ? { ...baseContainerStyle, borderBottom: 'none', padding: '1rem', width: '500px', position: 'fixed' as any } : baseContainerStyle;
+
   return (
-    <div style={{ marginBottom: '1rem' }}>
+    <div style={{ marginBottom: isFloating ? 0 : '1rem' }}>
       {isAnalyzingColumns ? (
         <div className="animate-shimmer shimmer-block" style={{ height: '60px', width: '100%', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)' }} />
       ) : (
-      <div className="animate-in" style={{ 
-        padding: '0.625rem 1rem', 
-        background: 'var(--bg-card)', 
-        borderRadius: 'var(--radius-lg)', 
-        border: '1px solid var(--border)',
-        boxShadow: 'var(--shadow-sm)',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '1.25rem'
-      }}>
-        
+      <div className={`timeline-slider-widget animate-in ${floatingClass}`} style={mergedStyle}>
+
+      {timeCols.length > 0 ? (
+        <>
         {/* Left Side: Title & Info */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.125rem', minWidth: '130px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
@@ -187,7 +196,12 @@ export default function TimelineSlider({
             {visibleCount} / {dataset.rowCount} rows
           </div>
         </div>
-
+        </>
+      ) : (
+        <div style={{ padding: '1rem', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+          No time columns found.
+        </div>
+      )}
       </div>
       )}
     </div>

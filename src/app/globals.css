@@ -1036,6 +1036,35 @@ p { color: var(--text-secondary); line-height: 1.7; }
   padding: 2rem;
 }
 
+.floating-widget {
+  position: fixed;
+  bottom: 2rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  z-index: 10000;
+  transition: all 0.3s ease;
+}
+
+.floating-bottom-left {
+  bottom: 2rem;
+  left: 2rem;
+  border-bottom: none;
+  border-left: none;
+  border-radius: 0 var(--radius-lg) 0 var(--radius-lg);
+}
+
+.floating-bottom-right {
+  bottom: 2rem;
+  right: 2rem;
+  border-bottom: none;
+  border-right: none;
+  border-radius: var(--radius-lg) 0 var(--radius-lg) 0;
+}
+
+
+
 .workspace-sidebar-right {
   width: 400px;
   flex-shrink: 0;
