@@ -4,7 +4,7 @@ import { useEffect, useRef, useMemo, useState } from 'react';
 import * as d3 from 'd3';
 import type { ParsedDataset, ColumnType } from '@/lib/csvParser';
 import { useDataset } from '@/context/DatasetContext';
-import { Sparkles, Plus, X, Maximize, Minimize } from 'lucide-react';
+import { Sparkles, Plus, X, Maximize, Minimize, ChevronRight, ChevronLeft } from 'lucide-react';
 
 interface Props {
   dataset: ParsedDataset;
@@ -36,6 +36,10 @@ export default function NetworkGraph({ dataset, filteredRows, isFullscreen, onTo
   const [maxNodes, setMaxNodes] = useState(60);
   const [showIsolated, setShowIsolated] = useState(false);
   const [colorByUnique, setColorByUnique] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const collapsed = isFullscreen && isCollapsed;
+  const [layoutType, setLayoutType] = useState<'force' | 'hierarchical'>('force');
+  const [edgeStyle, setEdgeStyle] = useState<'straight' | 'curved'>('straight');
 
   // Update defaults when dataset changes
   useEffect(() => {
@@ -102,19 +106,32 @@ export default function NetworkGraph({ dataset, filteredRows, isFullscreen, onTo
     svg.attr('viewBox', `0 0 ${width} ${height}`);
 
     const g = svg.append('g');
+    
+    // Semantic Zooming state
+    let currentZoomScale = 1;
+    
     svg.call(
       d3.zoom<SVGSVGElement, unknown>()
-        .scaleExtent([0.2, 4])
-        .on('zoom', (event) => g.attr('transform', event.transform)) as any
+        .scaleExtent([0.1, 4])
+        .on('zoom', (event) => {
+          g.attr('transform', event.transform);
+          currentZoomScale = event.transform.k;
+          
+          // Semantic zooming: show labels only when zoomed in, or for big nodes
+          g.selectAll('text.node-label')
+            .attr('opacity', (d: any) => {
+               if (currentZoomScale > 1.5) return 1;
+               if (d.count >= Math.max(1, maxCount * 0.1)) return 1;
+               return Math.max(0, (currentZoomScale - 0.5) * 2);
+            });
+        }) as any
     );
 
     const groups = [...new Set(nodes.map(n => n.group))];
     const uniqueIds = nodes.map(n => n.id);
     const colorDomain = colorByUnique ? uniqueIds : groups;
     
-    // Default palette for column-based coloring
     const defaultRange = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ef4444', '#ec4899'];
-    // Generated palette for unique nodes
     const range = colorByUnique 
       ? d3.quantize(t => d3.interpolateRainbow(t * 0.8 + 0.1), Math.max(uniqueIds.length, 2))
       : defaultRange;
@@ -127,11 +144,9 @@ export default function NetworkGraph({ dataset, filteredRows, isFullscreen, onTo
     const sizeScale = d3.scaleSqrt().domain([0, maxCount]).range([4, 14]);
     const maxLinkVal = Math.max(...links.map(l => l.value), 1);
 
-    const sim = d3.forceSimulation(nodes as any)
-      .force('link', d3.forceLink(links as any).id((d: any) => d.id).distance(80).strength(0.7))
-      .force('charge', d3.forceManyBody().strength(-180))
-      .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius((d: any) => sizeScale(d.count) + 6));
+    // Prepare links array for D3 simulation
+    const simulationLinks = links.map(d => Object.create(d));
+    const simulationNodes = nodes.map(d => Object.create(d));
 
     const defs = svg.append('defs');
     defs.append('marker')
@@ -146,64 +161,116 @@ export default function NetworkGraph({ dataset, filteredRows, isFullscreen, onTo
       .attr('d', 'M0,-5L10,0L0,5')
       .attr('fill', '#88888840');
 
-    const link = g.append('g')
-      .selectAll('line')
-      .data(links)
-      .join('line')
-      .attr('stroke', (d) => {
-        const sourceNode = nodes.find(n => n.id === (d.source as any).id || n.id === d.source);
-        return colorScale(colorByUnique ? (sourceNode?.id || '') : (sourceNode?.group || ''));
+    // Layout Calculations
+    let sim: d3.Simulation<d3.SimulationNodeDatum, undefined> | null = null;
+    
+    if (layoutType === 'force') {
+      sim = d3.forceSimulation(simulationNodes as any)
+        .force('link', d3.forceLink(simulationLinks as any).id((d: any) => d.id).distance(80).strength(0.7))
+        .force('charge', d3.forceManyBody().strength(-180))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('collision', d3.forceCollide().radius((d: any) => sizeScale(d.count) + 6));
+
+    } else if (layoutType === 'hierarchical') {
+      // Dagre/Tree approximation using Y-stratification based on degree
+      sim = d3.forceSimulation(simulationNodes as any)
+        .force('link', d3.forceLink(simulationLinks as any).id((d: any) => d.id).distance(60).strength(1))
+        .force('charge', d3.forceManyBody().strength(-200))
+        .force('y', d3.forceY((d: any) => {
+          // Simple hierarchy based on node count (high count = top)
+          return height * 0.2 + (1 - d.count / maxCount) * height * 0.6;
+        }).strength(0.8))
+        .force('x', d3.forceX(width / 2).strength(0.1))
+        .force('collision', d3.forceCollide().radius((d: any) => sizeScale(d.count) + 6));
+    }
+
+    const linkGroup = g.append('g').attr('class', 'links');
+    const linkPaths = linkGroup
+      .selectAll('path')
+      .data(simulationLinks)
+      .join('path')
+      .attr('fill', 'none')
+      .attr('stroke', (d: any) => {
+        return colorScale(colorByUnique ? d.source.id : d.source.group);
       })
       .attr('stroke-opacity', 0.35)
-      .attr('stroke-width', (d) => 0.8 + (d.value / maxLinkVal) * 3)
+      .attr('stroke-width', (d: any) => 0.8 + (d.value / maxLinkVal) * 3)
       .attr('stroke-linecap', 'round');
 
-    const node = g.append('g')
-      .selectAll<SVGGElement, Node>('g')
-      .data(nodes)
+    const nodeGroup = g.append('g').attr('class', 'nodes');
+    const nodeElements = nodeGroup
+      .selectAll<SVGGElement, any>('g')
+      .data(simulationNodes)
       .join('g')
-      .attr('cursor', 'pointer')
-      .call(
-        d3.drag<SVGGElement, Node>()
-          .on('start', (event, d: any) => {
-            if (!event.active) sim.alphaTarget(0.3).restart();
+      .attr('cursor', 'pointer');
+      
+    if (true) {
+      nodeElements.call(
+        d3.drag<SVGGElement, any>()
+          .on('start', (event, d) => {
+            if (!event.active && sim) sim.alphaTarget(0.3).restart();
             d.fx = d.x; d.fy = d.y;
           })
-          .on('drag', (event, d: any) => { d.fx = event.x; d.fy = event.y; })
-          .on('end', (event, d: any) => {
-            if (!event.active) sim.alphaTarget(0);
+          .on('drag', (event, d) => { d.fx = event.x; d.fy = event.y; })
+          .on('end', (event, d) => {
+            if (!event.active && sim) sim.alphaTarget(0);
             d.fx = null; d.fy = null;
           }) as any
       );
+    }
 
-    node.append('circle')
-      .attr('r', d => sizeScale(d.count))
-      .attr('fill', d => colorScale(colorByUnique ? d.id : d.group))
+    nodeElements.append('circle')
+      .attr('r', (d: any) => sizeScale(d.count))
+      .attr('fill', (d: any) => colorScale(colorByUnique ? d.id : d.group))
       .attr('fill-opacity', 0.9)
       .attr('stroke', '#ffffff')
-      .attr('stroke-width', 1.5)
-      .on('mouseover', function (event, d) {
-        d3.select(this).transition().duration(120).attr('r', sizeScale(d.count) + 3).attr('stroke-width', 2.5);
-        showTooltip(event, d);
-      })
-      .on('mousemove', (event) => moveTooltip(event))
-      .on('mouseout', function (event, d) {
-        d3.select(this).transition().duration(120).attr('r', sizeScale(d.count)).attr('stroke-width', 1.5);
-        hideTooltip();
-      });
+      .attr('stroke-width', 1.5);
 
-    node.append('text')
-      .filter(d => d.count >= Math.max(1, maxCount * 0.05))
-      .text(d => d.id.length > 16 ? d.id.slice(0, 15) + '…' : d.id)
-      .attr('x', d => sizeScale(d.count) + 4)
+    nodeElements.append('text')
+      .attr('class', 'node-label')
+      .filter((d: any) => d.count >= Math.max(1, maxCount * 0.05))
+      .text((d: any) => d.id.length > 16 ? d.id.slice(0, 15) + '…' : d.id)
+      .attr('x', (d: any) => sizeScale(d.count) + 4)
       .attr('y', 4)
-      .attr('font-size', d => Math.min(11, 8 + (d.count / maxCount) * 3) + 'px')
+      .attr('font-size', (d: any) => Math.min(11, 8 + (d.count / maxCount) * 3) + 'px')
       .attr('font-family', 'Inter, sans-serif')
       .attr('fill', '#334155')
       .attr('pointer-events', 'none')
       .attr('paint-order', 'stroke')
       .attr('stroke', '#ffffff')
-      .attr('stroke-width', 2.5);
+      .attr('stroke-width', 2.5)
+      .attr('opacity', 1);
+
+    // Ego-Network Hover Logic
+    nodeElements.on('mouseover', function(event, d) {
+      d3.select(this).select('circle').transition().duration(120).attr('r', sizeScale(d.count) + 3).attr('stroke-width', 2.5);
+      
+      // Dim others
+      nodeElements.transition().duration(200).style('opacity', o => {
+        const isConnected = simulationLinks.some((l: any) => 
+          (l.source.id === d.id && l.target.id === o.id) || 
+          (l.target.id === d.id && l.source.id === o.id)
+        );
+        return isConnected || o.id === d.id ? 1 : 0.1;
+      });
+      linkPaths.transition().duration(200).style('opacity', (l: any) => 
+        l.source.id === d.id || l.target.id === d.id ? 1 : 0.05
+      );
+      
+      showTooltip(event, d);
+    });
+
+    nodeElements.on('mousemove', (event) => moveTooltip(event));
+
+    nodeElements.on('mouseout', function(event, d) {
+      d3.select(this).select('circle').transition().duration(120).attr('r', sizeScale(d.count)).attr('stroke-width', 1.5);
+      
+      // Restore opacity
+      nodeElements.transition().duration(200).style('opacity', 1);
+      linkPaths.transition().duration(200).style('opacity', 0.35);
+      
+      hideTooltip();
+    });
 
     const wrapper = d3.select(svgRef.current.parentElement);
     const tooltip = wrapper.append('div')
@@ -223,7 +290,7 @@ export default function NetworkGraph({ dataset, filteredRows, isFullscreen, onTo
       .style('z-index', '100')
       .style('max-width', '220px');
 
-    function showTooltip(event: MouseEvent, d: Node) {
+    function showTooltip(event: MouseEvent, d: any) {
       tooltip
         .style('opacity', '1')
         .html(`
@@ -243,20 +310,33 @@ export default function NetworkGraph({ dataset, filteredRows, isFullscreen, onTo
     }
     function hideTooltip() { tooltip.style('opacity', '0'); }
 
-    sim.on('tick', () => {
-      link
-        .attr('x1', (d: any) => d.source.x)
-        .attr('y1', (d: any) => d.source.y)
-        .attr('x2', (d: any) => d.target.x)
-        .attr('y2', (d: any) => d.target.y);
-      node.attr('transform', (d: any) => `translate(${d.x},${d.y})`);
-    });
+    // Update function for positions
+    const updatePositions = () => {
+      linkPaths.attr('d', (d: any) => {
+        if (edgeStyle === 'curved') {
+          const dx = d.target.x - d.source.x;
+          const dy = d.target.y - d.source.y;
+          const dr = Math.sqrt(dx * dx + dy * dy);
+          return `M${d.source.x},${d.source.y}A${dr},${dr} 0 0,1 ${d.target.x},${d.target.y}`;
+        } else {
+          return `M${d.source.x},${d.source.y}L${d.target.x},${d.target.y}`;
+        }
+      });
+      nodeElements.attr('transform', (d: any) => `translate(${d.x},${d.y})`);
+    };
+
+    if (sim) {
+      sim.on('tick', updatePositions);
+    } else {
+      // Static layout
+      updatePositions();
+    }
 
     return () => {
-      sim.stop();
+      if (sim) sim.stop();
       tooltip.remove();
     };
-  }, [nodes, links, colorByUnique]);
+  }, [nodes, links, colorByUnique, layoutType, edgeStyle]);
 
   const colOptions = dataset.columns.filter(c =>
     !['latitude', 'longitude', 'number'].includes(c.type)
@@ -361,7 +441,17 @@ export default function NetworkGraph({ dataset, filteredRows, isFullscreen, onTo
             <X size={18} />
           </button>
         )}
-        {/* Controls Panel */}
+        {collapsed ? (
+          <div style={{ position: 'absolute', bottom: '2rem', right: '2rem', zIndex: 10000 }}>
+            <button 
+              onClick={() => setIsCollapsed(false)}
+              style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg-card)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-secondary)' }}
+              title="Expand Controls"
+            >
+              <ChevronLeft size={18} />
+            </button>
+          </div>
+        ) : (
         <div className={isFullscreen ? `floating-widget floating-bottom-right` : ''} style={{
           padding: '1rem 1.25rem',
           borderBottom: isFullscreen ? 'none' : '1px solid var(--border)',
@@ -372,6 +462,15 @@ export default function NetworkGraph({ dataset, filteredRows, isFullscreen, onTo
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <h3 style={{ margin: 0, fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>Network Relationships</h3>
+              {isFullscreen && (
+                <button 
+                  onClick={() => setIsCollapsed(true)} 
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', marginLeft: '2px', display: 'flex' }}
+                  title="Collapse"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              )}
               {onToggleFullscreen && (
                 <button 
                   onClick={onToggleFullscreen} 
@@ -397,6 +496,17 @@ export default function NetworkGraph({ dataset, filteredRows, isFullscreen, onTo
                 </label>
               </div>
             </div>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+            <select className="input select" value={layoutType} onChange={e => setLayoutType(e.target.value as any)} style={{ fontSize: '0.75rem', padding: '4px 8px', flex: 1, border: '1px solid var(--border)', background: 'var(--bg-main)' }}>
+              <option value="force">Force Layout</option>
+              <option value="hierarchical">Hierarchical Layout</option>
+            </select>
+            <select className="input select" value={edgeStyle} onChange={e => setEdgeStyle(e.target.value as any)} style={{ fontSize: '0.75rem', padding: '4px 8px', flex: 1, border: '1px solid var(--border)', background: 'var(--bg-main)' }}>
+              <option value="straight">Straight Edges</option>
+              <option value="curved">Curved Edges</option>
+            </select>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -440,6 +550,7 @@ export default function NetworkGraph({ dataset, filteredRows, isFullscreen, onTo
             </div>
           </div>
         </div>
+        )}
 
         {/* Bottom panel: SVG canvas */}
         <div style={{ flex: 1, position: 'relative', overflow: 'hidden', background: 'transparent' }}>

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import type { ParsedDataset } from '@/lib/csvParser';
 import InfoTooltip from '@/components/ui/InfoTooltip';
 import { useDataset } from '@/context/DatasetContext';
+import { ChevronDown, ChevronUp, ChevronRight, ChevronLeft } from 'lucide-react';
 
 interface Props {
   dataset: ParsedDataset;
@@ -65,6 +66,8 @@ export default function TimelineSlider({
   }, [dragging, minYear, maxYear, rangeSpan, startYear, endYear, setStartYear, setEndYear]);
 
   const { isAnalyzingColumns } = useDataset();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const collapsed = isFloating && isCollapsed;
 
   const baseContainerStyle: React.CSSProperties = {
     background: 'var(--bg-card)',
@@ -80,6 +83,20 @@ export default function TimelineSlider({
 
   const floatingClass = isFloating ? `floating-widget floating-bottom-left` : '';
   const mergedStyle = isFloating ? { ...baseContainerStyle, borderBottom: 'none', padding: '1rem', width: '500px', position: 'fixed' as any } : baseContainerStyle;
+
+  if (collapsed) {
+    return (
+      <div style={{ position: 'fixed', bottom: '2rem', left: '2rem', zIndex: 10000 }}>
+        <button 
+          onClick={() => setIsCollapsed(false)}
+          style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'var(--bg-card)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: 'var(--text-secondary)' }}
+          title="Expand Timeline"
+        >
+          <ChevronRight size={18} />
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div style={{ 
@@ -102,6 +119,15 @@ export default function TimelineSlider({
               content="Drag the slider handles to focus on a specific era. Dashboard updates instantly."
               position="right"
             />
+            {isFloating && (
+              <button 
+                onClick={() => setIsCollapsed(true)} 
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', marginLeft: '2px', display: 'flex' }}
+                title="Collapse"
+              >
+                <ChevronLeft size={16} />
+              </button>
+            )}
           </div>
           <p style={{ margin: 0, fontSize: '0.65rem', color: 'var(--text-muted)' }}>
             Filter temporal trends
