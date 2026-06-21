@@ -20,7 +20,7 @@ interface Link { source: string; target: string; value: number; }
 const ENTITY_TYPES: ColumnType[] = ['entity', 'location', 'category', 'relationship', 'text'];
 
 export default function NetworkGraph({ dataset, filteredRows, isFullscreen, onToggleFullscreen }: Props) {
-  const { globalDataInsights, isGeneratingGlobalInsights } = useDataset();
+  const { globalDataInsights, isGeneratingGlobalInsights, isAnalyzingColumns } = useDataset();
   const svgRef = useRef<SVGSVGElement>(null);
 
   // Pick default columns: prefer typed entity cols, fall back to any string col
@@ -280,6 +280,38 @@ export default function NetworkGraph({ dataset, filteredRows, isFullscreen, onTo
     setRelationships(newRels);
   };
 
+  if (isAnalyzingColumns) {
+    return (
+      <div style={{ display: 'flex', gap: '1rem', height: '100%' }}>
+        <div className="chart-card" style={{ flex: '1 1 70%', padding: '1.5rem' }}>
+          <div className="animate-shimmer" style={{ height: '24px', width: '200px', borderRadius: '6px', marginBottom: '1.5rem' }} />
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
+            <div className="animate-shimmer" style={{ height: '32px', width: '160px', borderRadius: '4px' }} />
+            <div className="animate-shimmer" style={{ height: '32px', width: '160px', borderRadius: '4px' }} />
+          </div>
+          <div style={{ width: '100%', height: 'calc(100% - 100px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div className="animate-shimmer" style={{ width: '400px', height: '400px', borderRadius: '50%', opacity: 0.1 }} />
+          </div>
+        </div>
+        <div className="chart-card" style={{ flex: '1 1 30%', minWidth: '320px', padding: '1.5rem' }}>
+          <div className="animate-shimmer" style={{ height: '20px', width: '140px', borderRadius: '4px', marginBottom: '1.5rem' }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {[1, 2, 3].map(i => (
+              <div key={i} style={{ padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
+                <div className="animate-shimmer" style={{ height: '14px', width: '90%', borderRadius: '4px', marginBottom: '0.5rem' }} />
+                <div className="animate-shimmer" style={{ height: '14px', width: '60%', borderRadius: '4px', marginBottom: '1rem' }} />
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div className="animate-shimmer" style={{ height: '24px', width: '80px', borderRadius: '12px' }} />
+                  <div className="animate-shimmer" style={{ height: '24px', width: '80px', borderRadius: '12px' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ display: 'flex', gap: '1rem', height: '100%' }}>
       {/* Main Graph Area */}
@@ -446,12 +478,12 @@ export default function NetworkGraph({ dataset, filteredRows, isFullscreen, onTo
               <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: '0.75rem', lineHeight: 1.5 }}>
                 {rec.reason}
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {rec.relationships.map((r, ri) => (
-                  <div key={ri} style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <span className="badge badge-gold" style={{ fontSize: '0.7rem', fontFamily: 'var(--font-sans)', textTransform: 'none' }}>{r.source}</span>
-                    <span>→</span>
-                    <span className="badge badge-gold" style={{ fontSize: '0.7rem', fontFamily: 'var(--font-sans)', textTransform: 'none' }}>{r.target}</span>
+                  <div key={ri} style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem', width: '100%', overflow: 'hidden' }}>
+                    <span className="badge badge-gold" title={r.source} style={{ flex: '0 1 auto', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.7rem', fontFamily: 'var(--font-sans)', textTransform: 'none' }}>{r.source}</span>
+                    <span style={{ flexShrink: 0 }}>→</span>
+                    <span className="badge badge-gold" title={r.target} style={{ flex: '0 1 auto', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '0.7rem', fontFamily: 'var(--font-sans)', textTransform: 'none' }}>{r.target}</span>
                   </div>
                 ))}
               </div>

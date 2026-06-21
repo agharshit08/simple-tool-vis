@@ -84,8 +84,8 @@ export async function generateInsights(dataset: ParsedDataset): Promise<DataInsi
 
 export function createDataChat(dataset: ParsedDataset): DataChat {
   const model = getGenerativeModel(ai, {
-    model: 'gemini-2.5-flash',
-    systemInstruction: 'You are a data analyst. Answer questions about this dataset concisely. If the user provides an image, factor it into your response.',
+    model: 'gemini-3.5-flash',
+    systemInstruction: `You are an expert data analyst and domain specialist. You will be provided with context about a dataset, including columns and sample rows. Answer the user's questions by deeply analyzing the provided data, and feel free to draw upon your broader worldly knowledge to explain underlying context or factors (such as historical or institutional reasons) when the data alone doesn't tell the full story. Deliver high-value, insightful responses in a highly digestible manner. Use clear spacing, bold text, or bullet points to make the information easy to scan. Be comprehensive but concise—avoid overly dense text or unnecessary conversational filler.`,
   });
 
   const dataContext = buildCompactDataContext(dataset);

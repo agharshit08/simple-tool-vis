@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { parseFileBasic, detectColumnsAI, generateInsightsHeuristics, getSheetNames } from '@/lib/csvParser';
 import { useDataset } from '@/context/DatasetContext';
+import { useNotification } from '@/context/NotificationContext';
 import { useRouter } from 'next/navigation';
 import { UploadCloud, FileSpreadsheet, FileText, Loader2, AlertCircle, BarChart3, Map as MapIcon, Clock, Network, Bot, ArrowRight } from 'lucide-react';
 
@@ -50,6 +51,7 @@ export default function UploadPage() {
   const [loadingMsg, setLoadingMsg] = useState('');
   const [progress, setProgress] = useState(0);
   const { setDataset, setResearchContext, setAnalyzingColumns, setSuggestedInsights } = useDataset();
+  const { notify } = useNotification();
   const [error, setError] = useState<string | null>(null);
   const [researchContextText, setResearchContextText] = useState('');
   const [availableSheets, setAvailableSheets] = useState<string[]>([]);
@@ -80,6 +82,7 @@ export default function UploadPage() {
           networkRecommendations: enrichedDataset.networkRecommendations
         } : null);
         setAnalyzingColumns(false);
+        notify('Aeterna has finished classifying your columns.', { type: 'success' });
       }).catch(err => {
         console.error('Background AI failed:', err);
         setAnalyzingColumns(false);

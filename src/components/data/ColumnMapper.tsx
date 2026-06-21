@@ -2,7 +2,7 @@
 
 import type { ParsedDataset, ColumnType } from '@/lib/csvParser';
 import { useDataset } from '@/context/DatasetContext';
-import { Eye, EyeOff, Columns, Bot } from 'lucide-react';
+import { Eye, EyeOff, Columns, Sparkles } from 'lucide-react';
 
 const ALL_TYPES: ColumnType[] = ['date', 'year', 'location', 'latitude', 'longitude', 'entity', 'number', 'boolean', 'category', 'text', 'relationship'];
 
@@ -47,8 +47,8 @@ export default function ColumnMapper() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', marginTop: '1rem' }}>
           <div style={{ padding: '0.75rem', background: 'var(--bg-hover)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-              <Bot size={16} color="var(--gold)" />
-              <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-primary)' }}>AI is classifying columns...</span>
+              <Sparkles size={16} color="var(--gold)" />
+              <span style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-primary)' }}>Aeterna is classifying columns...</span>
             </div>
             <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>Detecting structures to build smart visualizations.</p>
           </div>

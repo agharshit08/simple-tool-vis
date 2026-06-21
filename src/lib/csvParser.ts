@@ -20,6 +20,7 @@ export interface ParsedDataset {
   filename: string;
   researchContext?: string;
   insights?: any;
+  isInsightsGenerated?: boolean;
   networkRecommendations?: { relationships: { source: string; target: string }[]; reason: string }[];
 }
 

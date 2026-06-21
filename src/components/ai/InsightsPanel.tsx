@@ -3,10 +3,11 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createDataChat, generateInsights, type DataInsight, type DataChat, type ChatMessage } from '@/lib/aiInsights';
 import type { ParsedDataset } from '@/lib/csvParser';
+import { useNotification } from '@/context/NotificationContext';
 import {
-  Bot, ClipboardList, MessageSquare, AlertTriangle, ArrowUp,
+  Sparkles, ClipboardList, MessageSquare, AlertTriangle, ArrowUp,
   Lightbulb, TrendingUp, BarChart3, Network, MapPin, RotateCcw,
-  Sparkles, Paperclip, X
+  Paperclip, X
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { useDataset } from '@/context/DatasetContext';
@@ -190,7 +191,7 @@ function SummaryTab({ insights, onAskQuestion }: { insights: DataInsight; onAskQ
             <div className="premium-card" style={{ padding: '1.25rem', background: 'linear-gradient(to bottom, var(--bg-card), var(--bg-main))' }}>
               <h4 style={{ ...sectionTitle, marginTop: 0 }}><MessageSquare size={14} /> Ask Your Data</h4>
               <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                Click a question to instantly start an AI chat about this dataset.
+                Click a question to instantly start a chat about this dataset.
               </p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 {insights.suggestedQuestions.map((q, i) => (
@@ -232,30 +233,33 @@ function AskDataTab({ dataset, suggestedQuestions, initialQuestion }: {
   const { chatInstance, setChatInstance, chatMessages, setChatMessages } = useDataset();
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // Init chat if it doesn't exist
-  useEffect(() => {
-    if (!chatInstance) {
-      setChatInstance(createDataChat(dataset));
-      setChatMessages([]);
-    }
-  }, [dataset, chatInstance, setChatInstance, setChatMessages]);
+  const { notify } = useNotification();
 
   // Handle initial question from Summary tab
   useEffect(() => {
-    if (initialQuestion && chatInstance) {
-      setInput('');
-      handleSend(initialQuestion);
+    if (initialQuestion) {
+      setInput(initialQuestion);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialQuestion, chatInstance]);
+  }, [initialQuestion]);
 
   // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages, loading]);
+
+  const handleInitChat = () => {
+    setIsInitializing(true);
+    // Simulate a slight delay for UI feedback
+    setTimeout(() => {
+      setChatInstance(createDataChat(dataset));
+      setChatMessages([]);
+      setIsInitializing(false);
+      notify('Aeterna is now online and ready to assist.', { type: 'success' });
+    }, 1200);
+  };
 
   const handleSend = useCallback(async (text?: string) => {
     const question = (text || input).trim();
@@ -269,15 +273,15 @@ function AskDataTab({ dataset, suggestedQuestions, initialQuestion }: {
     
     try {
       await chatInstance.sendMessage(question);
-      // Sync global state with chat history which now contains both the user message and model reply
       setChatMessages(chatInstance.getHistory());
+      notify('Aeterna has replied to your message.', { type: 'success' });
     } catch {
       setChatMessages(prev => [...prev, { role: 'model', text: 'Sorry, I could not process that. Please try again.' }]);
     } finally {
       setLoading(false);
       inputRef.current?.focus();
     }
-  }, [input, chatInstance, loading, setChatMessages]);
+  }, [input, chatInstance, loading, setChatMessages, notify]);
 
   const handleReset = () => {
     if (!chatInstance) return;
@@ -289,39 +293,93 @@ function AskDataTab({ dataset, suggestedQuestions, initialQuestion }: {
   const noMessages = chatMessages.length === 0;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
-      {/* Messages area */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        {/* Suggested questions when empty */}
-        {noMessages && suggestedQuestions.length > 0 && (
-          <div style={{ padding: '0.5rem 0' }}>
-            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.75rem', fontFamily: 'var(--font-sans)' }}>
-              Try asking:
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0, flex: 1 }}>
+      {!chatInstance ? (
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem', textAlign: 'center' }}>
+          <div style={{ marginBottom: '1.5rem', opacity: isInitializing ? 0.5 : 1, transition: 'opacity 0.3s' }}>
+            <div style={{ 
+              width: '72px', height: '72px', borderRadius: '50%', 
+              background: 'var(--bg-hover)', display: 'flex', 
+              alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.25rem',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.05)', border: '1px solid var(--border)'
+            }}>
+              <Sparkles size={24} style={{ color: 'var(--text-primary)' }} />
+            </div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '0.5rem', fontFamily: 'var(--font-serif)' }}>
+              Consult Aeterna
+            </h3>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', maxWidth: '280px', margin: '0 auto', lineHeight: 1.6 }}>
+              Initialize a session to interrogate your dataset using natural language.
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
-              {suggestedQuestions.map((q, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleSend(q)}
-                  style={{
-                    padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-md)',
-                    background: 'var(--bg-main)', border: '1px solid var(--border)',
-                    fontSize: '0.75rem', color: 'var(--gold)', cursor: 'pointer',
-                    textAlign: 'left', fontFamily: 'var(--font-sans)', transition: 'all 0.15s',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--gold)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}
-                >
-                  → {q}
-                </button>
-              ))}
+          </div>
+          
+          <button
+            onClick={handleInitChat}
+            disabled={isInitializing}
+            style={{
+              padding: '0.75rem 1.75rem',
+              borderRadius: 'var(--radius-full)',
+              background: 'var(--gold)',
+              color: '#ffffff',
+              fontWeight: 500,
+              fontSize: '0.875rem',
+              border: 'none',
+              cursor: isInitializing ? 'wait' : 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              opacity: isInitializing ? 0.8 : 1,
+              transition: 'all 0.2s',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.15)',
+            }}
+          >
+            {isInitializing ? (
+              <>
+                <div className="spinner" style={{ width: '14px', height: '14px', border: '2px solid rgba(0,0,0,0.2)', borderTopColor: '#000', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                Awakening Aeterna...
+              </>
+            ) : (
+              <>
+                <MessageSquare size={16} />
+                Initialize Session
+              </>
+            )}
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* Messages area */}
+          <div style={{ flex: 1, overflowY: 'auto', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            {/* Suggested questions when empty */}
+            {noMessages && suggestedQuestions.length > 0 && (
+              <div style={{ padding: '0.5rem 0' }}>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.75rem', fontFamily: 'var(--font-sans)' }}>
+                  Aeterna is ready. Try asking:
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+                  {suggestedQuestions.map((q, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setInput(q)}
+                      style={{
+                        padding: '0.5rem 0.75rem', borderRadius: 'var(--radius-md)',
+                        background: 'var(--bg-main)', border: '1px solid var(--border)',
+                        fontSize: '0.75rem', color: 'var(--gold)', cursor: 'pointer',
+                        textAlign: 'left', fontFamily: 'var(--font-sans)', transition: 'all 0.15s',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--gold)'; }}
+                      onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border)'; }}
+                    >
+                      → {q}
+                    </button>
+                  ))}
             </div>
           </div>
         )}
 
         {noMessages && suggestedQuestions.length === 0 && (
           <div style={{ textAlign: 'center', padding: '2rem 0', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-            <Bot size={24} style={{ opacity: 0.4, marginBottom: '0.5rem' }} />
+            <Sparkles size={24} style={{ opacity: 0.4, marginBottom: '0.5rem' }} />
             <p>Ask anything about your dataset.</p>
           </div>
         )}
@@ -382,17 +440,29 @@ function AskDataTab({ dataset, suggestedQuestions, initialQuestion }: {
         display: 'flex', flexDirection: 'column', gap: '0.5rem',
         background: 'var(--bg-card)',
       }}>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-          <input
-            ref={inputRef}
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
+          <textarea
+            ref={inputRef as any}
             className="input"
-            type="text"
             value={input}
             onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
             placeholder="Ask about your data..."
             disabled={loading}
-            style={{ flex: 1, fontSize: '0.8rem', padding: '0.5rem 0.75rem' }}
+            rows={3}
+            style={{ 
+              flex: 1, 
+              fontSize: '0.8125rem', 
+              padding: '0.75rem', 
+              resize: 'none',
+              lineHeight: 1.5,
+              borderRadius: '12px'
+            }}
           />
           <button
             onClick={() => handleSend()}
@@ -404,6 +474,7 @@ function AskDataTab({ dataset, suggestedQuestions, initialQuestion }: {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transition: 'all 0.15s', flexShrink: 0,
               color: input.trim() ? '#ffffff' : 'var(--text-muted)',
+              marginBottom: '4px'
             }}
           >
             <ArrowUp size={16} />
@@ -420,19 +491,19 @@ function AskDataTab({ dataset, suggestedQuestions, initialQuestion }: {
         .markdown-message p:first-child { margin-top: 0; }
         .markdown-message p:last-child { margin-bottom: 0; }
       `}</style>
+        </>
+      )}
     </div>
   );
 }
 
-// ─── Main Panel ─────────────────────────────────────────────────────
-
 export default function AIInsightsPanel({ dataset, filteredRows }: Props) {
   const [activeTab, setActiveTab] = useState<'summary' | 'askdata'>('summary');
   const [pendingQuestion, setPendingQuestion] = useState<string | null>(null);
+  const { notify } = useNotification();
   
-  const { isAnalyzingColumns, setDataset } = useDataset();
+  const { isAnalyzingColumns, setDataset, globalDataInsights } = useDataset();
   
-  const [localInsights, setLocalInsights] = useState<DataInsight | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
   const handleAskQuestion = (q: string) => {
@@ -447,8 +518,11 @@ export default function AIInsightsPanel({ dataset, filteredRows }: Props) {
     setIsGenerating(true);
     try {
       const insights = await generateInsights(dataset);
-      setDataset(prev => prev ? { ...prev, insights } : null);
-      setLocalInsights(insights);
+      setDataset(prev => prev ? { ...prev, insights, isInsightsGenerated: true } : null);
+      notify('Your dataset summary is ready.', { 
+        type: 'success', 
+        action: { label: 'View Summary', onClick: () => setActiveTab('summary') } 
+      });
     } catch (e) {
       console.error('Failed to generate insights', e);
     } finally {
@@ -460,7 +534,7 @@ export default function AIInsightsPanel({ dataset, filteredRows }: Props) {
     return (
       <div style={{ height: '100%' }}>
         <div style={{ padding: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid var(--border)' }}>
-          <Bot size={18} color="var(--text-primary)" />
+          <Sparkles size={16} color="var(--text-primary)" />
           <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1rem', margin: 0 }}>Insights</h3>
         </div>
         <div style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
@@ -475,7 +549,7 @@ export default function AIInsightsPanel({ dataset, filteredRows }: Props) {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Header */}
       <div style={{ padding: '1rem', paddingRight: '2.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid var(--border)' }}>
-        <Bot size={18} color="var(--text-primary)" />
+        <Sparkles size={18} color="var(--text-primary)" />
         <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1rem', margin: 0 }}>Insights</h3>
       </div>
 
@@ -494,7 +568,7 @@ export default function AIInsightsPanel({ dataset, filteredRows }: Props) {
         
         {/* SUMMARY TAB */}
         <div style={{ display: activeTab === 'summary' ? 'block' : 'none', height: '100%' }}>
-          {!localInsights ? (
+          {!dataset?.isInsightsGenerated ? (
             <div style={{ padding: '2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '1.5rem' }}>
               {isGenerating ? (
                 <>
@@ -509,7 +583,7 @@ export default function AIInsightsPanel({ dataset, filteredRows }: Props) {
                   <div>
                     <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-primary)', fontSize: '1rem' }}>Ready to explore?</h4>
                     <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem', lineHeight: 1.6, margin: 0 }}>
-                      Our AI can generate a comprehensive summary, detect anomalies, suggest charts, and let you chat with your data.
+                      Aeterna can generate a comprehensive summary, detect anomalies, suggest charts, and let you chat with your data.
                     </p>
                   </div>
                   <button
@@ -534,19 +608,19 @@ export default function AIInsightsPanel({ dataset, filteredRows }: Props) {
                     onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
                     onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
                   >
-                    <Bot size={16} /> Unlock AI Insights
+                    <Sparkles size={16} /> Unlock Insights
                   </button>
                 </>
               )}
             </div>
           ) : (
-            <SummaryTab insights={localInsights} onAskQuestion={handleAskQuestion} />
+            globalDataInsights && <SummaryTab insights={globalDataInsights} onAskQuestion={handleAskQuestion} />
           )}
         </div>
 
         {/* ASK DATA TAB */}
-        <div style={{ display: activeTab === 'askdata' ? 'block' : 'none', height: '100%' }}>
-          {!localInsights ? (
+        <div style={{ display: activeTab === 'askdata' ? 'flex' : 'none', flexDirection: 'column', height: '100%' }}>
+          {!dataset?.isInsightsGenerated ? (
             <div style={{ padding: '2rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '1.5rem' }}>
               {isGenerating ? (
                 <>
@@ -555,7 +629,7 @@ export default function AIInsightsPanel({ dataset, filteredRows }: Props) {
                 </>
               ) : (
                 <>
-                  <Bot size={32} style={{ opacity: 0.5, marginBottom: '1rem' }} />
+                  <Sparkles size={20} style={{ opacity: 0.5, marginBottom: '1rem' }} />
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Generate insights first to start asking questions.</p>
                   <button
                     onClick={() => setActiveTab('summary')}
@@ -575,9 +649,9 @@ export default function AIInsightsPanel({ dataset, filteredRows }: Props) {
               )}
             </div>
           ) : (
-            <AskDataTab
+            globalDataInsights && <AskDataTab
               dataset={dataset}
-              suggestedQuestions={localInsights.suggestedQuestions || []}
+              suggestedQuestions={globalDataInsights.suggestedQuestions || []}
               initialQuestion={pendingQuestion}
             />
           )}

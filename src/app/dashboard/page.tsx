@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useDataset } from '@/context/DatasetContext';
+import { useNotification } from '@/context/NotificationContext';
 import dynamic from 'next/dynamic';
 import DataTable from '@/components/data/DataTable';
 import ColumnMapper from '@/components/data/ColumnMapper';
@@ -9,7 +10,7 @@ import TimelineSlider from '@/components/data/TimelineSlider';
 import AIInsightsPanel from '@/components/ai/InsightsPanel';
 import Link from 'next/link';
 import InfoTooltip from '@/components/ui/InfoTooltip';
-import { Compass, TableProperties, BarChart3, Map as MapIcon, Network, ChevronLeft, ChevronRight, Database, Columns, Bot, X, UploadCloud } from 'lucide-react';
+import { Compass, TableProperties, BarChart3, Map as MapIcon, Network, ChevronLeft, ChevronRight, Database, Columns, Sparkles, X, UploadCloud } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 const ChartPanel = dynamic(() => import('@/components/charts/ChartPanel'), { ssr: false });
@@ -28,17 +29,18 @@ export default function DashboardPage() {
   const [isLeftPaneExpanded, setIsLeftPaneExpanded] = useState(true);
 
   // Mapping Completion Toast State
-  const [showMappingToast, setShowMappingToast] = useState(false);
+  const { notify } = useNotification();
   const prevIsMappingRef = useRef(isMapping);
 
   useEffect(() => {
     if (prevIsMappingRef.current && !isMapping && mappingProgress === 100) {
-      setShowMappingToast(true);
-      const t = setTimeout(() => setShowMappingToast(false), 4000);
-      return () => clearTimeout(t);
+      notify('Geocoding complete! Your data is ready to map.', { 
+        type: 'success', 
+        action: { label: 'View Map', onClick: () => setActiveView('map') } 
+      });
     }
     prevIsMappingRef.current = isMapping;
-  }, [isMapping, mappingProgress]);
+  }, [isMapping, mappingProgress, notify]);
 
   const [isRightPaneExpanded, setIsRightPaneExpanded] = useState(false);
   const [activeTool, setActiveTool] = useState<RightTool>('columns');
@@ -217,10 +219,10 @@ export default function DashboardPage() {
               <button 
                 className={`workspace-nav-btn ${activeTool === 'ai' && isRightPaneExpanded ? 'active' : ''}`}
                 onClick={() => { setActiveTool('ai'); setIsRightPaneExpanded(true); }}
-                title="AI Insights"
+                title="Insights"
               >
-                <Bot size={20} />
-                <span className="nav-label">AI Insights</span>
+                <Sparkles size={20} />
+                <span className="nav-label">Insights</span>
               </button>
             </nav>
           </div>
@@ -253,22 +255,6 @@ export default function DashboardPage() {
 
       {/* Center Workspace */}
       <main className={`workspace-center ${isFullscreen ? 'fullscreen' : ''}`}>
-        
-        {/* Global Mapping Notification Toast */}
-        {showMappingToast && (
-          <div style={{
-            position: 'absolute', top: '16px', right: '16px', zIndex: 9999,
-            background: 'var(--primary)', color: 'white', padding: '12px 24px',
-            borderRadius: '8px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            display: 'flex', alignItems: 'center', gap: '8px',
-            animation: 'slideIn 0.3s ease forwards',
-            fontWeight: 500, fontSize: '0.875rem'
-          }}>
-            <MapIcon size={18} />
-            Coordinates mapped successfully!
-          </div>
-        )}
-
         {/* Timeline Slider (now shown everywhere) */}
         {(selectedYearCol || isAnalyzingColumns) && (
           <TimelineSlider 
@@ -321,14 +307,8 @@ export default function DashboardPage() {
       {/* Right Sidebar Toolkit */}
       <aside className={`workspace-sidebar-right ${isRightPaneExpanded ? '' : 'collapsed'}`}>
         {/* Toolkit Content (When Expanded) */}
-        <div className="sidebar-content" style={{ padding: activeTool === 'ai' ? '0' : '1.5rem', width: '400px', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-          {activeTool === 'columns' && (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
-              <h3 style={{ margin: 0, fontSize: '1rem', fontFamily: 'var(--font-serif)', color: 'var(--text-primary)' }}>
-                Column Settings
-              </h3>
-            </div>
-          )}
+        <div className="sidebar-content" style={{ padding: activeTool === 'ai' ? '0' : '1.5rem', width: '400px', position: 'relative', display: 'flex', flexDirection: 'column', height: '100%' }}>
+
           
           <button 
             className="btn btn-ghost btn-sm" 
