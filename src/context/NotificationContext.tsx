@@ -33,6 +33,9 @@ function playPopSound() {
     const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioContext) return;
     const ctx = new AudioContext();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     
@@ -44,7 +47,8 @@ function playPopSound() {
     osc.frequency.setValueAtTime(600, ctx.currentTime);
     osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.1);
     
-    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    // Increased volume from 0.1 to 0.4 so it's more audible
+    gain.gain.setValueAtTime(0.4, ctx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
     
     osc.start();
@@ -62,10 +66,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
     setNotifications(prev => [...prev, { id, message, type: options?.type || 'info', action: options?.action }]);
     playPopSound();
     
-    // Auto remove after 5 seconds
+    // Auto remove after 8 seconds (increased from 5s)
     setTimeout(() => {
       setNotifications(prev => prev.filter(n => n.id !== id));
-    }, 5000);
+    }, 8000);
   }, []);
 
   const dismiss = (id: string) => {
@@ -87,10 +91,10 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
       }}>
         {notifications.map(n => (
           <div key={n.id} style={{
-            background: 'var(--bg-card)',
-            border: `1px solid var(--border)`,
+            background: '#1e293b', // Darker background for higher contrast
+            border: `1px solid rgba(255,255,255,0.1)`,
             borderRadius: 'var(--radius-lg)',
-            boxShadow: 'var(--shadow-lg)',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2)',
             padding: '12px 16px',
             display: 'flex',
             alignItems: 'center',
@@ -99,15 +103,15 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
             maxWidth: '400px',
             pointerEvents: 'auto',
             animation: 'slideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-            color: 'var(--text-primary)'
+            color: '#ffffff' // White text for visibility
           }}>
             {n.type === 'success' ? (
-              <CheckCircle2 size={18} style={{ color: 'var(--success)', flexShrink: 0 }} />
+              <CheckCircle2 size={18} style={{ color: '#4ade80', flexShrink: 0 }} /> // bright green
             ) : (
-              <Info size={18} style={{ color: 'var(--gold)', flexShrink: 0 }} />
+              <Info size={18} style={{ color: '#60a5fa', flexShrink: 0 }} /> // bright blue
             )}
             
-            <span style={{ fontSize: '0.875rem', fontWeight: 500, flex: 1, fontFamily: 'var(--font-sans)' }}>
+            <span style={{ fontSize: '0.875rem', fontWeight: 500, flex: 1, fontFamily: 'var(--font-sans)', color: '#ffffff' }}>
               {n.message}
             </span>
             
@@ -116,7 +120,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
                 onClick={() => { n.action!.onClick(); dismiss(n.id); }}
                 style={{
                   background: 'none',
-                  color: 'var(--text-primary)',
+                  color: '#93c5fd', // Light blue action text
                   border: 'none',
                   padding: '4px 8px',
                   fontSize: '0.8125rem',
@@ -139,7 +143,7 @@ export function NotificationProvider({ children }: { children: ReactNode }) {
               onClick={() => dismiss(n.id)}
               style={{
                 background: 'none', border: 'none', cursor: 'pointer',
-                color: 'var(--text-muted)', padding: '2px', display: 'flex'
+                color: '#94a3b8', padding: '2px', display: 'flex'
               }}
             >
               <X size={14} />

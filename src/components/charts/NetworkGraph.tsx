@@ -282,7 +282,17 @@ export default function NetworkGraph({ dataset, filteredRows, isFullscreen, onTo
 
   if (isAnalyzingColumns) {
     return (
-      <div style={{ display: 'flex', gap: '1rem', height: '100%' }}>
+      <div style={{ display: 'flex', gap: '1rem', height: '100%', position: 'relative' }}>
+        <div style={{
+          position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', 
+          alignItems: 'center', justifyContent: 'center', zIndex: 10,
+          background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(4px)',
+          borderRadius: 'var(--radius-lg)'
+        }}>
+          <div className="spinner" style={{ width: '32px', height: '32px', border: '3px solid var(--gold)', borderTopColor: 'transparent', marginBottom: '1rem' }} />
+          <h3 style={{ margin: 0, color: 'var(--text-primary)', fontWeight: 600 }}>Analyzing Network Nodes...</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.5rem' }}>Identifying relationships and entity classifications</p>
+        </div>
         <div className="chart-card" style={{ flex: '1 1 70%', padding: '1.5rem' }}>
           <div className="animate-shimmer" style={{ height: '24px', width: '200px', borderRadius: '6px', marginBottom: '1.5rem' }} />
           <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '2rem' }}>
@@ -326,6 +336,31 @@ export default function NetworkGraph({ dataset, filteredRows, isFullscreen, onTo
         overflow: 'hidden',
         position: 'relative'
       }}>
+        {isFullscreen && onToggleFullscreen && (
+          <button 
+            onClick={onToggleFullscreen}
+            style={{
+              position: 'absolute',
+              top: '1rem',
+              right: '1rem',
+              zIndex: 1000,
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              borderRadius: '50%',
+              width: '36px',
+              height: '36px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              boxShadow: 'var(--shadow-sm)',
+              color: 'var(--text-secondary)'
+            }}
+            title="Close Full Screen"
+          >
+            <X size={18} />
+          </button>
+        )}
         {/* Controls Panel */}
         <div className={isFullscreen ? `floating-widget floating-bottom-right` : ''} style={{
           padding: '1rem 1.25rem',

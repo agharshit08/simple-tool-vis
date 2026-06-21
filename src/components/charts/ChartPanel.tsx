@@ -160,7 +160,17 @@ export default function ChartPanel({ dataset, filteredRows }: Props) {
 
   if (isAnalyzingColumns) {
     return (
-      <div className="chart-card">
+      <div className="chart-card" style={{ position: 'relative' }}>
+        <div style={{
+          position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', 
+          alignItems: 'center', justifyContent: 'center', zIndex: 10,
+          background: 'rgba(255, 255, 255, 0.7)', backdropFilter: 'blur(4px)',
+          borderRadius: 'var(--radius-xl)'
+        }}>
+          <div className="spinner" style={{ width: '32px', height: '32px', border: '3px solid var(--gold)', borderTopColor: 'transparent', marginBottom: '1rem' }} />
+          <h3 style={{ margin: 0, color: 'var(--text-primary)', fontWeight: 600 }}>Analyzing Variables...</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.5rem' }}>Categorizing data types to build charts</p>
+        </div>
         <div className="chart-card-header">
           <div className="animate-shimmer" style={{ height: '24px', width: '120px', borderRadius: '4px' }} />
           <div className="animate-shimmer" style={{ height: '32px', width: '180px', borderRadius: '6px' }} />

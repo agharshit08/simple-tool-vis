@@ -67,7 +67,7 @@ export default function TimelineSlider({
   const { isAnalyzingColumns } = useDataset();
 
   const baseContainerStyle: React.CSSProperties = {
-    background: 'var(--bg-main)',
+    background: 'var(--bg-card)',
     borderBottom: '1px solid var(--border)',
     padding: '1.25rem 2rem',
     display: 'flex',
@@ -82,7 +82,11 @@ export default function TimelineSlider({
   const mergedStyle = isFloating ? { ...baseContainerStyle, borderBottom: 'none', padding: '1rem', width: '500px', position: 'fixed' as any } : baseContainerStyle;
 
   return (
-    <div style={{ marginBottom: isFloating ? 0 : '1rem' }}>
+    <div style={{ 
+      marginBottom: isFloating ? 0 : '1rem',
+      position: isFloating ? 'relative' : 'static',
+      zIndex: isFloating ? 10000 : 'auto'
+    }}>
       {isAnalyzingColumns ? (
         <div className="animate-shimmer shimmer-block" style={{ height: '60px', width: '100%', border: '1px solid var(--border)', borderRadius: 'var(--radius-lg)' }} />
       ) : (

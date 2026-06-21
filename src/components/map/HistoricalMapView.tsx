@@ -348,16 +348,17 @@ export default function HistoricalMapView({ dataset, filteredRows }: Props) {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            color: "var(--text-muted)",
-            background: "var(--bg-card)",
+            background: 'rgba(255, 255, 255, 0.7)', 
+            backdropFilter: 'blur(4px)',
           }}
         >
-          <span
+          <div
             className="spinner"
-            style={{ width: 24, height: 24, marginBottom: "1rem" }}
+            style={{ width: '32px', height: '32px', border: '3px solid var(--gold)', borderTopColor: 'transparent', marginBottom: '1rem' }}
           />
-          <p style={{ fontSize: "0.875rem" }}>
-            Classifying location columns using AI...
+          <h3 style={{ margin: 0, color: 'var(--text-primary)', fontWeight: 600 }}>Analyzing Geography...</h3>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginTop: '0.5rem' }}>
+            Identifying spatial and location data
           </p>
         </div>
       )}
